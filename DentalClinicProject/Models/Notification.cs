@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace DentalClinicProject.Models
+{
+    public partial class Notification
+    {
+        public int Id { get; set; }
+        public string? Content { get; set; }
+        public int? IsRead { get; set; }
+        public DateTime? Date { get; set; }
+    }
+}
