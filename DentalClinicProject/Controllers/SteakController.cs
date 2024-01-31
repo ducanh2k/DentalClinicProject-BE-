@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using WebApplication2.Models;
+using DentalClinicProject.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Reflection.Metadata;
+using Microsoft.Data.SqlClient;
 
-namespace WebApplication2.Controllers
+namespace DentalClinicProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
