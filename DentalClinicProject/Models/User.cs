@@ -7,25 +7,27 @@ namespace DentalClinicProject.Models
     {
         public User()
         {
-            Blogs = new HashSet<Blog>();
-            BookTables = new HashSet<BookTable>();
-            Carts = new HashSet<Cart>();
-            Orders = new HashSet<Order>();
+            AppointmentEmployees = new HashSet<Appointment>();
+            AppointmentPatients = new HashSet<Appointment>();
+            Invoices = new HashSet<Invoice>();
+            MedicalRecords = new HashSet<MedicalRecord>();
         }
 
-        public int Id { get; set; }
-        public string Username { get; set; } = null!;
-        public string Password { get; set; } = null!;
-        public int Role { get; set; }
-        public string Name { get; set; } = null!;
-        public string Email { get; set; } = null!;
-        public string Phone { get; set; } = null!;
-        public string Address { get; set; } = null!;
-        public int? NumberOfLogins { get; set; }
+        public int UserId { get; set; }
+        public string? Name { get; set; }
+        public DateTime? DateCreated { get; set; }
+        public string? Phone { get; set; }
+        public string? Email { get; set; }
+        public string? Img { get; set; }
+        public string? Description { get; set; }
+        public double? Salary { get; set; }
+        public int? Role { get; set; }
+        public string? Password { get; set; }
 
-        public virtual ICollection<Blog> Blogs { get; set; }
-        public virtual ICollection<BookTable> BookTables { get; set; }
-        public virtual ICollection<Cart> Carts { get; set; }
-        public virtual ICollection<Order> Orders { get; set; }
+        public virtual Role? RoleNavigation { get; set; }
+        public virtual ICollection<Appointment> AppointmentEmployees { get; set; }
+        public virtual ICollection<Appointment> AppointmentPatients { get; set; }
+        public virtual ICollection<Invoice> Invoices { get; set; }
+        public virtual ICollection<MedicalRecord> MedicalRecords { get; set; }
     }
 }
