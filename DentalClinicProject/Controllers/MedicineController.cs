@@ -23,7 +23,7 @@ namespace DentalClinicProject.Controllers
             var medicines = _context.Medicines.ToList();
             if (medicines == null || medicines.Count == 0)
             {
-                return NotFound("Không có dịch vụ");
+                return NotFound("Không có thuốc");
             }
             return Ok(medicines);
         }
