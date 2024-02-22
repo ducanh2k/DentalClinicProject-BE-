@@ -1,3 +1,4 @@
+using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,8 +10,13 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+//Config automapper
+builder.Services.AddAutoMapper(typeof(MyMapperProfile));
+
+// Config Db
 builder.Services.AddDbContext<dentalContext>(
     option => option.UseSqlServer(builder.Configuration.GetConnectionString("MyDB")));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
