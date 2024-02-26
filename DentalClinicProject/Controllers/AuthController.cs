@@ -64,8 +64,7 @@ namespace DentalClinicProject.Controllers
             _context.Users.Add(newUser);
             _context.SaveChanges();
 
-            var token = GenerateToken(newUser.UserId);
-            return Ok(new { Token = token });
+            return Ok("Register Successfully.");
         }
 
         private string GenerateToken(int userId)
