@@ -1,5 +1,6 @@
 using DentalClinicProject.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling=Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+    .AddNewtonsoftJson(options=>options.SerializerSettings.ContractResolver= new DefaultContractResolver());
 builder.Services.AddDbContext<dentalContext>(
     option => option.UseSqlServer(builder.Configuration.GetConnectionString("MyDB")));
 var app = builder.Build();
