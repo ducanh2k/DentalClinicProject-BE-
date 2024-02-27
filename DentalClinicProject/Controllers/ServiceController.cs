@@ -70,7 +70,7 @@ namespace DentalClinicProject.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateEmployee(int id, ServiceDTO serDTO)
+        public ActionResult UpdateService(int id, ServiceDTO serDTO)
         {
             var service = _context.Services.FirstOrDefault(o => o.ServiceId == id);
             if (service == null)
