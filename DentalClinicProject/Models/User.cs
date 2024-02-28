@@ -9,8 +9,12 @@ namespace DentalClinicProject.Models
         {
             AppointmentEmployees = new HashSet<Appointment>();
             AppointmentPatients = new HashSet<Appointment>();
+            Comments = new HashSet<Comment>();
+            Degrees = new HashSet<Degree>();
+            ForeignLanguages = new HashSet<ForeignLanguage>();
             Invoices = new HashSet<Invoice>();
             MedicalRecords = new HashSet<MedicalRecord>();
+            ParticipatingTrainingCourses = new HashSet<ParticipatingTrainingCourse>();
         }
 
         public int UserId { get; set; }
@@ -28,7 +32,11 @@ namespace DentalClinicProject.Models
         public virtual Role? RoleNavigation { get; set; }
         public virtual ICollection<Appointment> AppointmentEmployees { get; set; }
         public virtual ICollection<Appointment> AppointmentPatients { get; set; }
+        public virtual ICollection<Comment> Comments { get; set; }
+        public virtual ICollection<Degree> Degrees { get; set; }
+        public virtual ICollection<ForeignLanguage> ForeignLanguages { get; set; }
         public virtual ICollection<Invoice> Invoices { get; set; }
         public virtual ICollection<MedicalRecord> MedicalRecords { get; set; }
+        public virtual ICollection<ParticipatingTrainingCourse> ParticipatingTrainingCourses { get; set; }
     }
 }
