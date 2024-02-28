@@ -2,6 +2,7 @@
 {
     public class UserDTO
     {
+        public int UserId { get; set; }
         public string? Name { get; set; }
         public DateTime? DateCreated { get; set; }
         public string? Phone { get; set; }
@@ -12,5 +13,6 @@
         public int? RoleId { get; set; }
         public string? RoleName { get; set; }
         public bool? DeleteFlag { get; set; }
+        public string? Password { get; set; }
     }
 }

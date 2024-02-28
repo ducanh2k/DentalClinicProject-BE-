@@ -2,6 +2,7 @@
 {
     public class ServiceDTO
     {
+        public int ServiceId { get; set; }
         public string? ServiceName { get; set; }
         public string? BriefInfo { get; set; }
         public string? Description { get; set; }

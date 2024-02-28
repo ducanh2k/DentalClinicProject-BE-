@@ -24,7 +24,13 @@ namespace DentalClinicProject.Controllers
         [HttpGet("list")]
         public IActionResult GetServices(int pageNumber)
         {
+            var totalServices = _context.Services
+                              .Count(s => s.DeleteFlag == false);
+
+            var totalPages = (int)Math.Ceiling((double)totalServices / PageSize);
+
             if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
             var services = _context.Services
                         .Where(s => s.DeleteFlag == false) 
                         .Skip((pageNumber - 1) * PageSize)
@@ -46,7 +52,13 @@ namespace DentalClinicProject.Controllers
             {
                 return BadRequest("Từ khóa tìm kiếm không được để trống");
             }
+            var totalServices = _context.Services
+                              .Count(s => s.DeleteFlag == false);
+
+            var totalPages = (int)Math.Ceiling((double)totalServices / PageSize);
+
             if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
             var services = _context.Services
                 .Where(s => s.ServiceName.Contains(keyword) && s.DeleteFlag == false)
                 .Skip((pageNumber - 1) * PageSize)
