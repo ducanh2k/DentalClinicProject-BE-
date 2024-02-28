@@ -11,5 +11,7 @@ namespace DentalClinicProject.Models
         public string? Description { get; set; }
         public int? Author { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public bool? DeleteFlag { get; set; }
+        public bool? Featured { get; set; }
     }
 }

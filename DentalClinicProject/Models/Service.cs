@@ -15,6 +15,7 @@ namespace DentalClinicProject.Models
         public string? BriefInfo { get; set; }
         public string? Description { get; set; }
         public double? Price { get; set; }
+        public bool? DeleteFlag { get; set; }
 
         public virtual ICollection<MedicalRecord> MedicalRecords { get; set; }
     }

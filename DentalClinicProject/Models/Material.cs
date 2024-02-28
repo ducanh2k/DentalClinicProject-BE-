@@ -11,5 +11,6 @@ namespace DentalClinicProject.Models
         public double? UnitPrice { get; set; }
         public int? QuantityInStock { get; set; }
         public bool? Type { get; set; }
+        public bool? DeleteFlag { get; set; }
     }
 }
