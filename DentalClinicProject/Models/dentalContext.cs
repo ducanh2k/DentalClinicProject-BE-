@@ -17,11 +17,16 @@ namespace DentalClinicProject.Models
         }
 
         public virtual DbSet<Appointment> Appointments { get; set; } = null!;
+        public virtual DbSet<AreasOfExpertise> AreasOfExpertises { get; set; } = null!;
+        public virtual DbSet<Comment> Comments { get; set; } = null!;
+        public virtual DbSet<Degree> Degrees { get; set; } = null!;
+        public virtual DbSet<ForeignLanguage> ForeignLanguages { get; set; } = null!;
         public virtual DbSet<Invoice> Invoices { get; set; } = null!;
         public virtual DbSet<Material> Materials { get; set; } = null!;
         public virtual DbSet<MedicalRecord> MedicalRecords { get; set; } = null!;
         public virtual DbSet<Medicine> Medicines { get; set; } = null!;
         public virtual DbSet<News> News { get; set; } = null!;
+        public virtual DbSet<ParticipatingTrainingCourse> ParticipatingTrainingCourses { get; set; } = null!;
         public virtual DbSet<Prescription> Prescriptions { get; set; } = null!;
         public virtual DbSet<Role> Roles { get; set; } = null!;
         public virtual DbSet<Service> Services { get; set; } = null!;
@@ -67,6 +72,65 @@ namespace DentalClinicProject.Models
                     .WithMany(p => p.AppointmentPatients)
                     .HasForeignKey(d => d.PatientId)
                     .HasConstraintName("FK_Appointment_User1");
+            });
+
+            modelBuilder.Entity<AreasOfExpertise>(entity =>
+            {
+                entity.ToTable("Areas_of_expertise");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Detail).HasColumnName("detail");
+
+                entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+            });
+
+            modelBuilder.Entity<Comment>(entity =>
+            {
+                entity.ToTable("comment");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CommentDetail).HasColumnName("commentDetail");
+
+                entity.Property(e => e.PatientId).HasColumnName("patient_id");
+
+                entity.HasOne(d => d.Patient)
+                    .WithMany(p => p.Comments)
+                    .HasForeignKey(d => d.PatientId)
+                    .HasConstraintName("FK_comment_User");
+            });
+
+            modelBuilder.Entity<Degree>(entity =>
+            {
+                entity.ToTable("Degree");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Detail).HasColumnName("detail");
+
+                entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+
+                entity.HasOne(d => d.Employee)
+                    .WithMany(p => p.Degrees)
+                    .HasForeignKey(d => d.EmployeeId)
+                    .HasConstraintName("FK_Degree_User");
+            });
+
+            modelBuilder.Entity<ForeignLanguage>(entity =>
+            {
+                entity.ToTable("Foreign_Language");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Detail).HasColumnName("detail");
+
+                entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+
+                entity.HasOne(d => d.Employee)
+                    .WithMany(p => p.ForeignLanguages)
+                    .HasForeignKey(d => d.EmployeeId)
+                    .HasConstraintName("FK_Foreign_Language_User");
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -225,6 +289,22 @@ namespace DentalClinicProject.Models
                 entity.Property(e => e.Tittle)
                     .HasMaxLength(50)
                     .HasColumnName("tittle");
+            });
+
+            modelBuilder.Entity<ParticipatingTrainingCourse>(entity =>
+            {
+                entity.ToTable("Participating_training_courses");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Detail).HasColumnName("detail");
+
+                entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+
+                entity.HasOne(d => d.Employee)
+                    .WithMany(p => p.ParticipatingTrainingCourses)
+                    .HasForeignKey(d => d.EmployeeId)
+                    .HasConstraintName("FK_Participating_training_courses_User");
             });
 
             modelBuilder.Entity<Prescription>(entity =>
