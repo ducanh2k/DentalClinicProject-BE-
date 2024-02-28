@@ -10,6 +10,7 @@ namespace DentalClinicProject.Models
         public int? PatientId { get; set; }
         public int? AppointmentId { get; set; }
         public double? Discount { get; set; }
+        public bool? DeleteFlag { get; set; }
 
         public virtual Appointment? Appointment { get; set; }
         public virtual User? Patient { get; set; }

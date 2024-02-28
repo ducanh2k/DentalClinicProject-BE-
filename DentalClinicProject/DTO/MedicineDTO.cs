@@ -10,5 +10,6 @@
         public int? QuantityInStock { get; set; }
         public string? Dosage { get; set; }
         public string? Description { get; set; }
+        public bool? DeleteFlag { get; set; }
     }
 }

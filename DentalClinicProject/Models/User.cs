@@ -23,6 +23,7 @@ namespace DentalClinicProject.Models
         public double? Salary { get; set; }
         public int? Role { get; set; }
         public string? Password { get; set; }
+        public bool? DeleteFlag { get; set; }
 
         public virtual Role? RoleNavigation { get; set; }
         public virtual ICollection<Appointment> AppointmentEmployees { get; set; }
