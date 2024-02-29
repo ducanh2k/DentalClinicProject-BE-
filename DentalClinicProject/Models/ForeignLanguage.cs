@@ -11,5 +11,4 @@ namespace DentalClinicProject.Models
 
         public virtual User? Employee { get; set; }
     }
-    
 }

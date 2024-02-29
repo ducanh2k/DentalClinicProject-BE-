@@ -11,16 +11,30 @@ namespace DentalClinicProject.Controllers
     public class MedicineController : Controller
     {
         private readonly dentalContext _context;
-
-        public MedicineController(dentalContext context)
+        private readonly IConfiguration _configuration;
+        private readonly int PageSize;
+        public MedicineController(dentalContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
+            PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
         }
 
         [HttpGet("list")]
-        public IActionResult GetMedicines()
+        public IActionResult GetMedicines(int pageNumber)
         {
-            var medicines = _context.Medicines.ToList();
+            var totalMeds = _context.Medicines
+                              .Count(s => s.DeleteFlag == false);
+
+            var totalPages = (int)Math.Ceiling((double)totalMeds / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+            var medicines = _context.Medicines
+                        .Where(s => s.DeleteFlag == false)
+                        .Skip((pageNumber - 1) * PageSize)
+                        .Take(PageSize)
+                        .ToList();
             if (medicines == null || medicines.Count == 0)
             {
                 return NotFound("Không có thuốc");
@@ -30,14 +44,29 @@ namespace DentalClinicProject.Controllers
 
         //search name
         [HttpGet("search")]
-        public IActionResult GetMedicinesByName(string keyword)
+        public IActionResult GetMedicinesByName(string keyword, int pageNumber)
         {
             if (string.IsNullOrWhiteSpace(keyword))
             {
                 return BadRequest("Từ khóa tìm kiếm không được để trống");
             }
+            var totalMeds = _context.Medicines
+                             .Count(s => s.DeleteFlag == false);
 
-            var medicines = _context.Medicines.Where(s => s.Name.Contains(keyword)).ToList();
+            var totalPages = (int)Math.Ceiling((double)totalMeds / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+
+            var medicines = _context.Medicines
+                .Where(s => s.Name.Contains(keyword)
+                || s.Dosage.Contains(keyword)
+                || s.Manufacturer.Contains(keyword)
+                || s.Description.Contains(keyword)
+                && s.DeleteFlag == false)
+                .Skip((pageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
 
             if (medicines == null || medicines.Count == 0)
             {
@@ -46,6 +75,34 @@ namespace DentalClinicProject.Controllers
 
             return Ok(medicines);
         }
+
+        [HttpGet("{id}")]
+        public IActionResult GetMedicine(int id)
+        {
+            var ser = _context.Medicines
+                .Where(x => x.Id == id)
+                .Select(d => new
+                {
+                    Id = d.Id,
+                    Name = d.Name,
+                    Price = d.Price,
+                    Manufacturer = d.Manufacturer,
+                    ExpiryDate = d.ExpiryDate,
+                    InputDay = d.InputDay,
+                    QuantityInStock = d.QuantityInStock,
+                    Dosage = d.Dosage,
+                    DeleteFlag = d.DeleteFlag,
+                    Description = d.Description
+                })
+                .FirstOrDefault();
+
+            if (ser == null)
+            {
+                return NotFound("Không có");
+            }
+            return Ok(ser);
+        }
+
 
         [HttpPost]
         public IActionResult AddMedicine(MedicineDTO med)
@@ -60,6 +117,7 @@ namespace DentalClinicProject.Controllers
                 QuantityInStock = med.QuantityInStock,
                 Dosage = med.Dosage,
                 Description = med.Description,
+                DeleteFlag = med.DeleteFlag,
             };
             try
             {
@@ -89,6 +147,7 @@ namespace DentalClinicProject.Controllers
                 medicine.QuantityInStock = medDTO.QuantityInStock;
                 medicine.Dosage = medDTO.Dosage;
                 medicine.Description = medDTO.Description;
+                medicine.DeleteFlag = medDTO.DeleteFlag;
             _context.SaveChanges();
             return NoContent();
         }
@@ -101,7 +160,7 @@ namespace DentalClinicProject.Controllers
             {
                 return NotFound();
             }
-            _context.Remove(medicine);
+            medicine.DeleteFlag = true;
             _context.SaveChanges();
             return NoContent();
         }

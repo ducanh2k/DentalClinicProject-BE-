@@ -88,6 +88,42 @@ namespace DentalClinicProject.Controllers
             return Ok(results);
         }
 
+        [HttpGet("{id}")]
+        public IActionResult GetUser(int id)
+        {
+       
+            var user = _context.Users
+        .Where(u => u.UserId == id)
+        .Select(u => new
+        {
+            User = new
+            {
+                u.UserId,
+                u.DateCreated,
+                u.Name,
+                u.Phone,
+                u.Email,
+                u.Img,
+                u.Description,
+                u.Salary,
+                u.Password,
+                u.DeleteFlag,
+                u.Role,
+                RoleName = u.RoleNavigation.Name
+            },
+            Degrees = u.Degrees.Select(d => new { d.Id, d.Detail }),
+            AreasOfExpertises = u.AreasOfExpertises.Select(a => new { a.Id, a.Detail }),
+            ForeignLanguages = u.ForeignLanguages.Select(f => new { f.Id, f.Detail }),
+            ParticipatingTrainingCourses = u.ParticipatingTrainingCourses.Select(p => new { p.Id, p.Detail })
+        })
+        .FirstOrDefault();
+            if (user == null)
+            {
+                return NotFound("Không có ");
+            }
+            return Ok(user);
+        }
+
         [HttpPost]
         public IActionResult AddUser(UserDTO userDTO)
         {
