@@ -12,7 +12,7 @@ namespace DentalClinicProject.Controllers
     {
         private readonly dentalContext _context;
         private readonly IConfiguration _configuration;
-        public readonly int PageSize;
+        private readonly int PageSize;
 
         public ServiceController(dentalContext context, IConfiguration configuration)
         {
@@ -60,7 +60,10 @@ namespace DentalClinicProject.Controllers
             if (pageNumber <= 0) pageNumber = 1;
             if (pageNumber > totalPages) pageNumber = totalPages;
             var services = _context.Services
-                .Where(s => s.ServiceName.Contains(keyword) && s.DeleteFlag == false)
+                .Where(s => s.ServiceName.Contains(keyword) 
+                || s.BriefInfo.Contains(keyword)
+                || s.Description.Contains(keyword)
+                && s.DeleteFlag == false)
                 .Skip((pageNumber - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
@@ -74,6 +77,30 @@ namespace DentalClinicProject.Controllers
 
             return Ok(services);
         }
+
+        [HttpGet("{id}")]
+        public IActionResult GetService(int id)
+        {
+            var ser = _context.Services
+                .Where(x => x.ServiceId == id)
+                .Select(d => new 
+                {
+                    ServiceId = d.ServiceId,
+                    ServiceName = d.ServiceName,
+                    Price = d.Price,
+                    BriefInfo = d.BriefInfo,
+                    Description = d.Description,
+                    DeleteFlag = d.DeleteFlag
+                })
+                .FirstOrDefault();
+
+            if (ser == null)
+            {
+                return NotFound("Không có");
+            }
+            return Ok(ser);
+        }
+
 
         [HttpPost]
         public IActionResult AddService(ServiceDTO ser)

@@ -1,4 +1,6 @@
-﻿namespace DentalClinicProject.DTO
+﻿using DentalClinicProject.Models;
+
+namespace DentalClinicProject.DTO
 {
     public class UserDTO
     {
@@ -14,5 +16,36 @@
         public string? RoleName { get; set; }
         public bool? DeleteFlag { get; set; }
         public string? Password { get; set; }
+    }
+
+    public partial class ForeignLanguageDTO
+    {
+        public int Id { get; set; }
+        public int? EmployeeId { get; set; }
+        public string? Detail { get; set; }
+
+    }
+
+    public partial class DegreeDTO
+    {
+        public int Id { get; set; }
+        public int? EmployeeId { get; set; }
+        public string? Detail { get; set; }
+
+    }
+
+    public partial class AreasOfExpertiseDTO
+    {
+        public int Id { get; set; }
+        public int? EmployeeId { get; set; }
+        public string? Detail { get; set; }
+
+    }
+
+    public partial class ParticipatingTrainingCourseDTO
+    {
+        public int Id { get; set; }
+        public int? EmployeeId { get; set; }
+        public string? Detail { get; set; }
     }
 }

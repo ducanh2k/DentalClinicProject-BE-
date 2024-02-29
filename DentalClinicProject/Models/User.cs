@@ -9,6 +9,7 @@ namespace DentalClinicProject.Models
         {
             AppointmentEmployees = new HashSet<Appointment>();
             AppointmentPatients = new HashSet<Appointment>();
+            AreasOfExpertises = new HashSet<AreasOfExpertise>();
             Comments = new HashSet<Comment>();
             Degrees = new HashSet<Degree>();
             ForeignLanguages = new HashSet<ForeignLanguage>();
@@ -32,6 +33,7 @@ namespace DentalClinicProject.Models
         public virtual Role? RoleNavigation { get; set; }
         public virtual ICollection<Appointment> AppointmentEmployees { get; set; }
         public virtual ICollection<Appointment> AppointmentPatients { get; set; }
+        public virtual ICollection<AreasOfExpertise> AreasOfExpertises { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
         public virtual ICollection<Degree> Degrees { get; set; }
         public virtual ICollection<ForeignLanguage> ForeignLanguages { get; set; }

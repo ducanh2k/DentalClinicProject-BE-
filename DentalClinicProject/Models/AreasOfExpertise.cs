@@ -8,5 +8,7 @@ namespace DentalClinicProject.Models
         public int Id { get; set; }
         public int? EmployeeId { get; set; }
         public string? Detail { get; set; }
+
+        public virtual User? Employee { get; set; }
     }
 }
