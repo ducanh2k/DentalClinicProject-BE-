@@ -151,12 +151,10 @@ namespace DentalClinicProject.Controllers
             return NoContent();
         }
 
-
+        // CRUD Degree
         [HttpGet("degree")]
         public IActionResult GetDegreesByUserId(int userId)
         {
-            var user = _context.Users.FirstOrDefault(r => r.UserId == userId);
-
             var degrees = _context.Degrees
                     .Where(d => d.EmployeeId == userId)
                     .Select(d => new {
@@ -172,6 +170,57 @@ namespace DentalClinicProject.Controllers
             }
             return Ok(degrees);
         }
+
+        [HttpPost("degree")]
+        public IActionResult AddDegree(DegreeDTO degreeDTO)
+        {
+            // Chuyển đổi từ DegreeDTO sang Degree nếu cần
+            var degree = new Degree
+            {
+                EmployeeId = degreeDTO.EmployeeId,
+                Detail = degreeDTO.Detail
+            };
+
+            _context.Degrees.Add(degree);
+            _context.SaveChanges();
+
+            return Ok("Degree đã được thêm thành công");
+        }
+
+        [HttpPut("degree/{id}")]
+        public IActionResult UpdateDegree(int id, DegreeDTO degreeDTO)
+        {
+            var degree = _context.Degrees.FirstOrDefault(d => d.Id == id);
+            if (degree == null)
+            {
+                return NotFound("Không tìm thấy degree");
+            }
+
+            // Cập nhật thông tin degree
+            degree.EmployeeId = degreeDTO.EmployeeId;
+            degree.Detail = degreeDTO.Detail;
+
+            _context.SaveChanges();
+
+            return Ok("Degree đã được cập nhật thành công");
+        }
+
+        [HttpDelete("degree/{id}")]
+        public IActionResult DeleteDegree(int id)
+        {
+            var degree = _context.Degrees.FirstOrDefault(d => d.Id == id);
+            if (degree == null)
+            {
+                return NotFound("Không tìm thấy degree");
+            }
+
+            _context.Degrees.Remove(degree);
+            _context.SaveChanges();
+
+            return Ok("Degree đã được xóa thành công");
+        }
+
+
 
         [HttpGet("AreasOfExpertise")]
         public IActionResult GetAreasOfExpertisesByUserId(int userId)

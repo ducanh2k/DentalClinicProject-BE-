@@ -11,4 +11,12 @@ namespace DentalClinicProject.Models
 
         public virtual User? Employee { get; set; }
     }
+
+    public partial class DegreeDTO
+    {
+        public int Id { get; set; }
+        public int? EmployeeId { get; set; }
+        public string? Detail { get; set; }
+
+    }
 }
