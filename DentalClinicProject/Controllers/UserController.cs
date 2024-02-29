@@ -243,6 +243,55 @@ namespace DentalClinicProject.Controllers
             return Ok(AreasOfExpertises);
         }
 
+        [HttpPost("AreasOfExpertise")]
+        public IActionResult AddAreaOfExpertise(AreasOfExpertiseDTO areaOfExpertiseDTO)
+        {
+            var areaOfExpertise = new AreasOfExpertise
+            {
+                EmployeeId = areaOfExpertiseDTO.EmployeeId,
+                Detail = areaOfExpertiseDTO.Detail
+            };
+
+            _context.AreasOfExpertises.Add(areaOfExpertise);
+            _context.SaveChanges();
+
+            return Ok("Kỹ năng chuyên môn đã được thêm thành công");
+        }
+
+        [HttpPut("AreasOfExpertise/{id}")]
+        public IActionResult UpdateAreaOfExpertise(int id, AreasOfExpertiseDTO updatedAreaOfExpertiseDTO)
+        {
+            var areaOfExpertise = _context.AreasOfExpertises.FirstOrDefault(a => a.Id == id);
+            if (areaOfExpertise == null)
+            {
+                return NotFound("Không tìm thấy kỹ năng chuyên môn");
+            }
+
+            // Cập nhật thông tin kỹ năng chuyên môn
+            areaOfExpertise.EmployeeId = updatedAreaOfExpertiseDTO.EmployeeId;
+            areaOfExpertise.Detail = updatedAreaOfExpertiseDTO.Detail;
+
+            _context.SaveChanges();
+
+            return Ok("Kỹ năng chuyên môn đã được cập nhật thành công");
+        }
+
+        [HttpDelete("AreasOfExpertise/{id}")]
+        public IActionResult DeleteAreaOfExpertise(int id)
+        {
+            var areaOfExpertise = _context.AreasOfExpertises.FirstOrDefault(a => a.Id == id);
+            if (areaOfExpertise == null)
+            {
+                return NotFound("Không tìm thấy kỹ năng chuyên môn");
+            }
+
+            _context.AreasOfExpertises.Remove(areaOfExpertise);
+            _context.SaveChanges();
+
+            return Ok("Kỹ năng chuyên môn đã được xóa thành công");
+        }
+
+
         [HttpGet("ForeignLanguages")]
         public IActionResult GetForeignLanguagesByUserId(int userId)
         {
@@ -264,6 +313,55 @@ namespace DentalClinicProject.Controllers
             return Ok(ForeignLanguages);
         }
 
+        [HttpPost("ForeignLanguages")]
+        public IActionResult AddForeignLanguage(ForeignLanguageDTO foreignLanguageDTO)
+        {
+            var foreignLanguage = new ForeignLanguage
+            {
+                EmployeeId = foreignLanguageDTO.EmployeeId,
+                Detail = foreignLanguageDTO.Detail
+            };
+
+            _context.ForeignLanguages.Add(foreignLanguage);
+            _context.SaveChanges();
+
+            return Ok("Ngoại ngữ đã được thêm thành công");
+        }
+
+        [HttpPut("ForeignLanguages/{id}")]
+        public IActionResult UpdateForeignLanguage(int id, ForeignLanguageDTO updatedForeignLanguageDTO)
+        {
+            var foreignLanguage = _context.ForeignLanguages.FirstOrDefault(f => f.Id == id);
+            if (foreignLanguage == null)
+            {
+                return NotFound("Không tìm thấy ngoại ngữ");
+            }
+
+            // Cập nhật thông tin ngoại ngữ
+            foreignLanguage.EmployeeId = updatedForeignLanguageDTO.EmployeeId;
+            foreignLanguage.Detail = updatedForeignLanguageDTO.Detail;
+
+            _context.SaveChanges();
+
+            return Ok("Ngoại ngữ đã được cập nhật thành công");
+        }
+
+        [HttpDelete("ForeignLanguages/{id}")]
+        public IActionResult DeleteForeignLanguage(int id)
+        {
+            var foreignLanguage = _context.ForeignLanguages.FirstOrDefault(f => f.Id == id);
+            if (foreignLanguage == null)
+            {
+                return NotFound("Không tìm thấy ngoại ngữ");
+            }
+
+            _context.ForeignLanguages.Remove(foreignLanguage);
+            _context.SaveChanges();
+
+            return Ok("Ngoại ngữ đã được xóa thành công");
+        }
+
+
         [HttpGet("ParticipatingTrainingCourse")]
         public IActionResult GetParticipatingTrainingCoursesByUserId(int userId)
         {
@@ -283,6 +381,54 @@ namespace DentalClinicProject.Controllers
                 return NotFound("Không có gi");
             }
             return Ok(ParticipatingTrainingCourses);
+        }
+
+        [HttpPost("ParticipatingTrainingCourses")]
+        public IActionResult AddParticipatingTrainingCourse(ParticipatingTrainingCourseDTO participatingTrainingCourseDTO)
+        {
+            var participatingTrainingCourse = new ParticipatingTrainingCourse
+            {
+                EmployeeId = participatingTrainingCourseDTO.EmployeeId,
+                Detail = participatingTrainingCourseDTO.Detail
+            };
+
+            _context.ParticipatingTrainingCourses.Add(participatingTrainingCourse);
+            _context.SaveChanges();
+
+            return Ok("Khóa đào tạo đã được thêm thành công");
+        }
+
+        [HttpPut("ParticipatingTrainingCourses/{id}")]
+        public IActionResult UpdateParticipatingTrainingCourse(int id, ParticipatingTrainingCourseDTO updatedParticipatingTrainingCourseDTO)
+        {
+            var participatingTrainingCourse = _context.ParticipatingTrainingCourses.FirstOrDefault(p => p.Id == id);
+            if (participatingTrainingCourse == null)
+            {
+                return NotFound("Không tìm thấy khóa đào tạo");
+            }
+
+            // Cập nhật thông tin khóa đào tạo
+            participatingTrainingCourse.EmployeeId = updatedParticipatingTrainingCourseDTO.EmployeeId;
+            participatingTrainingCourse.Detail = updatedParticipatingTrainingCourseDTO.Detail;
+
+            _context.SaveChanges();
+
+            return Ok("Khóa đào tạo đã được cập nhật thành công");
+        }
+
+        [HttpDelete("ParticipatingTrainingCourses/{id}")]
+        public IActionResult DeleteParticipatingTrainingCourse(int id)
+        {
+            var participatingTrainingCourse = _context.ParticipatingTrainingCourses.FirstOrDefault(p => p.Id == id);
+            if (participatingTrainingCourse == null)
+            {
+                return NotFound("Không tìm thấy khóa đào tạo");
+            }
+
+            _context.ParticipatingTrainingCourses.Remove(participatingTrainingCourse);
+            _context.SaveChanges();
+
+            return Ok("Khóa đào tạo đã được xóa thành công");
         }
 
 

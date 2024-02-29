@@ -37,7 +37,7 @@ namespace DentalClinicProject.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("server =localhost; database = dental;uid=sa;pwd=123;TrustServerCertificate=true");
+                optionsBuilder.UseSqlServer("server =(local); database = dental;uid=sa;pwd=123;TrustServerCertificate=true");
             }
         }
 
@@ -83,6 +83,11 @@ namespace DentalClinicProject.Models
                 entity.Property(e => e.Detail).HasColumnName("detail");
 
                 entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+
+                entity.HasOne(d => d.Employee)
+                    .WithMany(p => p.AreasOfExpertises)
+                    .HasForeignKey(d => d.EmployeeId)
+                    .HasConstraintName("FK_Areas_of_expertise_User");
             });
 
             modelBuilder.Entity<Comment>(entity =>
