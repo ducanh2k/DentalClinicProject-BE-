@@ -72,7 +72,7 @@ namespace DentalClinicProject.Controllers
 
             var users = _context.Users
                 .Include(r => r.RoleNavigation)
-                .Where(s => s.Name.Contains(keyword) && s.DeleteFlag == false)
+                .Where(s => s.Name.Contains(keyword) || s.Email.Contains(keyword) || s.Phone.Contains(keyword) && s.DeleteFlag == false)
                 .Skip((pageNumber - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
@@ -100,7 +100,9 @@ namespace DentalClinicProject.Controllers
                 Img = userDTO.Img,
                 Description = userDTO.Description,
                 Salary = userDTO.Salary,
-                Role = userDTO.RoleId
+                Role = userDTO.RoleId,
+                Password = userDTO.Password,
+                DeleteFlag = userDTO.DeleteFlag,
             };
             try
             {
@@ -130,6 +132,7 @@ namespace DentalClinicProject.Controllers
                 user.Description = userDTO.Description;
                 user.Salary = userDTO.Salary;
                 user.Role = userDTO.RoleId;
+                user.Password = userDTO.Password;
                 user.DeleteFlag = userDTO.DeleteFlag;
             _context.SaveChanges();
             return NoContent();
