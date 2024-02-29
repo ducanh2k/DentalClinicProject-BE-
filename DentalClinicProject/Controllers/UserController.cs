@@ -100,7 +100,9 @@ namespace DentalClinicProject.Controllers
                 Img = userDTO.Img,
                 Description = userDTO.Description,
                 Salary = userDTO.Salary,
-                Role = userDTO.RoleId
+                Role = userDTO.RoleId,
+                DeleteFlag = false,
+                Password = userDTO.Password,
             };
             try
             {
@@ -122,15 +124,16 @@ namespace DentalClinicProject.Controllers
             {
                 return NotFound();
             }
-                user.Name = userDTO.Name;
-                user.DateCreated = DateTime.Now;
-                user.Phone = userDTO.Phone;
-                user.Email = userDTO.Email;
-                user.Img = userDTO.Img;
-                user.Description = userDTO.Description;
-                user.Salary = userDTO.Salary;
-                user.Role = userDTO.RoleId;
-                user.DeleteFlag = userDTO.DeleteFlag;
+            user.Name = userDTO.Name;
+            user.DateCreated = DateTime.Now;
+            user.Phone = userDTO.Phone;
+            user.Email = userDTO.Email;
+            user.Img = userDTO.Img;
+            user.Description = userDTO.Description;
+            user.Salary = userDTO.Salary;
+            user.Role = userDTO.RoleId;
+            user.DeleteFlag = userDTO.DeleteFlag;
+            user.Password = userDTO.Password;
             _context.SaveChanges();
             return NoContent();
         }
@@ -156,7 +159,8 @@ namespace DentalClinicProject.Controllers
 
             var degrees = _context.Degrees
                     .Where(d => d.EmployeeId == userId)
-                    .Select(d => new {
+                    .Select(d => new
+                    {
                         d.Id,
                         d.EmployeeId,
                         d.Detail
@@ -177,7 +181,8 @@ namespace DentalClinicProject.Controllers
 
             var AreasOfExpertises = _context.AreasOfExpertises
                     .Where(d => d.EmployeeId == userId)
-                    .Select(d => new {
+                    .Select(d => new
+                    {
                         d.Id,
                         d.EmployeeId,
                         d.Detail
@@ -198,7 +203,8 @@ namespace DentalClinicProject.Controllers
 
             var ForeignLanguages = _context.ForeignLanguages
                     .Where(d => d.EmployeeId == userId)
-                    .Select(d => new {
+                    .Select(d => new
+                    {
                         d.Id,
                         d.EmployeeId,
                         d.Detail
@@ -219,7 +225,8 @@ namespace DentalClinicProject.Controllers
 
             var ParticipatingTrainingCourses = _context.ParticipatingTrainingCourses
                     .Where(d => d.EmployeeId == userId)
-                    .Select(d => new {
+                    .Select(d => new
+                    {
                         d.Id,
                         d.EmployeeId,
                         d.Detail
