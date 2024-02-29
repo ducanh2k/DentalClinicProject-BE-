@@ -10,17 +10,31 @@ namespace DentalClinicProject.Controllers
     {
         
         private readonly dentalContext _context;
-
-        public MaterialController(dentalContext context)
+        private readonly IConfiguration _configuration;
+        private readonly int PageSize;
+        public MaterialController(dentalContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
+            PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
         }
 
         //get all 
         [HttpGet("list")]
-        public IActionResult GetMaterials()
+        public IActionResult GetMaterials(int pageNumber)
         {
-            var Materials = _context.Materials.ToList();
+            var totalMats = _context.Materials
+                              .Count(s => s.DeleteFlag == false);
+
+            var totalPages = (int)Math.Ceiling((double)totalMats / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+            var Materials = _context.Materials
+                .Where(s => s.DeleteFlag == false)
+                        .Skip((pageNumber - 1) * PageSize)
+                        .Take(PageSize)
+                .ToList();
             if (Materials == null || Materials.Count == 0)
             {
                 return NotFound("Không có dịch vụ");
@@ -28,16 +42,42 @@ namespace DentalClinicProject.Controllers
             return Ok(Materials);
         }
 
+        [HttpGet("{id}")]
+        public IActionResult GetMaterial(int id)
+        {
+            var ser = _context.Materials
+                .Where(x => x.MaterialId == id)
+                .FirstOrDefault();
+
+            if (ser == null)
+            {
+                return NotFound("Không có");
+            }
+            return Ok(ser);
+        }
+
         //search name
         [HttpGet("search")]
-        public IActionResult GetMaterialsByName(string keyword)
+        public IActionResult GetMaterialsByName(string keyword, int pageNumber)
         {
             if (string.IsNullOrWhiteSpace(keyword))
             {
                 return BadRequest("Từ khóa tìm kiếm không được để trống");
             }
+            var totalMats = _context.Materials
+                              .Count(s => s.DeleteFlag == false);
 
-            var Materials = _context.Materials.Where(s => s.MaterialName.Contains(keyword)).ToList();
+            var totalPages = (int)Math.Ceiling((double)totalMats / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+            var Materials = _context.Materials
+                .Where(s => s.MaterialName.Contains(keyword) 
+                || s.Supplier.Contains(keyword)
+                && s.DeleteFlag == false
+                )
+                .Skip((pageNumber - 1) * PageSize)
+                .Take(PageSize).ToList();
 
             if (Materials == null || Materials.Count == 0)
             {
@@ -88,7 +128,7 @@ namespace DentalClinicProject.Controllers
             {
                 return NotFound();
             }
-            _context.Remove(material);
+            material.DeleteFlag = true;
             _context.SaveChanges();
             return NoContent();
         }
