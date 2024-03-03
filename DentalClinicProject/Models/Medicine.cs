@@ -7,7 +7,7 @@ namespace DentalClinicProject.Models
     {
         public Medicine()
         {
-            Prescriptions = new HashSet<Prescription>();
+            PrescriptionDetails = new HashSet<PrescriptionDetail>();
         }
 
         public int Id { get; set; }
@@ -21,6 +21,6 @@ namespace DentalClinicProject.Models
         public string? Description { get; set; }
         public bool? DeleteFlag { get; set; }
 
-        public virtual ICollection<Prescription> Prescriptions { get; set; }
+        public virtual ICollection<PrescriptionDetail> PrescriptionDetails { get; set; }
     }
 }

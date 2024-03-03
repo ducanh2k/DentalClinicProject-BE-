@@ -11,6 +11,7 @@ namespace DentalClinicProject.Models
         public int? ServiceId { get; set; }
         public int? PrescriptionId { get; set; }
         public string? Diagnosis { get; set; }
+        public bool? DeleteFlag { get; set; }
 
         public virtual Appointment? Appointment { get; set; }
         public virtual MedicalRecord? MedicalRecord { get; set; }

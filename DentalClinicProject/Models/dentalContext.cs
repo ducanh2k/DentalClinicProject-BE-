@@ -29,6 +29,7 @@ namespace DentalClinicProject.Models
         public virtual DbSet<News> News { get; set; } = null!;
         public virtual DbSet<ParticipatingTrainingCourse> ParticipatingTrainingCourses { get; set; } = null!;
         public virtual DbSet<Prescription> Prescriptions { get; set; } = null!;
+        public virtual DbSet<PrescriptionDetail> PrescriptionDetails { get; set; } = null!;
         public virtual DbSet<Role> Roles { get; set; } = null!;
         public virtual DbSet<Service> Services { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
@@ -224,6 +225,8 @@ namespace DentalClinicProject.Models
 
                 entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
 
+                entity.Property(e => e.DeleteFlag).HasColumnName("delete_flag");
+
                 entity.Property(e => e.Diagnosis)
                     .HasMaxLength(500)
                     .HasColumnName("diagnosis");
@@ -339,7 +342,7 @@ namespace DentalClinicProject.Models
             {
                 entity.ToTable("Prescription");
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.PrescriptionId).HasColumnName("prescription_id");
 
                 entity.Property(e => e.CreatedDate)
                     .HasColumnType("datetime")
@@ -349,27 +352,46 @@ namespace DentalClinicProject.Models
 
                 entity.Property(e => e.DoctorId).HasColumnName("doctor_id");
 
+                entity.Property(e => e.Note)
+                    .HasMaxLength(1000)
+                    .HasColumnName("note");
+
+                entity.HasOne(d => d.Doctor)
+                    .WithMany(p => p.Prescriptions)
+                    .HasForeignKey(d => d.DoctorId)
+                    .HasConstraintName("FK_Prescription_User");
+            });
+
+            modelBuilder.Entity<PrescriptionDetail>(entity =>
+            {
+                entity.ToTable("Prescription Details");
+
+                entity.Property(e => e.PrescriptionDetailId).HasColumnName("prescriptionDetail_id");
+
+                entity.Property(e => e.DeleteFlag)
+                    .HasMaxLength(10)
+                    .HasColumnName("delete_flag")
+                    .IsFixedLength();
+
                 entity.Property(e => e.DosageInstruction)
                     .HasMaxLength(1000)
                     .HasColumnName("dosageInstruction");
 
                 entity.Property(e => e.MedicineId).HasColumnName("medicineId");
 
-                entity.Property(e => e.Note)
-                    .HasMaxLength(1000)
-                    .HasColumnName("note");
+                entity.Property(e => e.PrescriptionId).HasColumnName("prescription_id");
 
                 entity.Property(e => e.Quantity).HasColumnName("quantity");
 
-                entity.HasOne(d => d.Doctor)
-                    .WithMany(p => p.Prescriptions)
-                    .HasForeignKey(d => d.DoctorId)
-                    .HasConstraintName("FK_Prescription_User");
-
                 entity.HasOne(d => d.Medicine)
-                    .WithMany(p => p.Prescriptions)
+                    .WithMany(p => p.PrescriptionDetails)
                     .HasForeignKey(d => d.MedicineId)
-                    .HasConstraintName("FK_Prescription_Medicine");
+                    .HasConstraintName("FK_Prescription Details_Medicine");
+
+                entity.HasOne(d => d.Prescription)
+                    .WithMany(p => p.PrescriptionDetails)
+                    .HasForeignKey(d => d.PrescriptionId)
+                    .HasConstraintName("FK_Prescription Details_Prescription");
             });
 
             modelBuilder.Entity<Role>(entity =>
