@@ -105,7 +105,7 @@ namespace DentalClinicProject.Controllers
                 CreatedDate = DateTime.Now,
                 DoctorId = PrescriptionDTO.DoctorId,
                 Note = PrescriptionDTO.Note,
-                DeleteFlag = PrescriptionDTO.DeleteFlag
+                DeleteFlag = false
 
 
             };
