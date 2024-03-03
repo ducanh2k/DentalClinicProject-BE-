@@ -11,7 +11,10 @@ namespace DentalClinicProject.DTO
                 .ForMember(dest => dest.RoleId, opt => opt.MapFrom(source => source.Role))
                 .ForMember(dest => dest.RoleName, opt => opt.MapFrom(source => source.RoleNavigation.Name))
                 ;
-
+            CreateMap<Appointment, AppointmentDTO>()
+                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(source => source.Employee.Name))
+                .ForMember(dest => dest.PatientName, opt => opt.MapFrom(source => source.Patient.Name))
+                ;
         }
     }
 }
