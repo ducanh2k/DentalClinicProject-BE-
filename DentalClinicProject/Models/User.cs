@@ -16,6 +16,7 @@ namespace DentalClinicProject.Models
             Invoices = new HashSet<Invoice>();
             MedicalRecords = new HashSet<MedicalRecord>();
             ParticipatingTrainingCourses = new HashSet<ParticipatingTrainingCourse>();
+            Prescriptions = new HashSet<Prescription>();
         }
 
         public int UserId { get; set; }
@@ -40,5 +41,6 @@ namespace DentalClinicProject.Models
         public virtual ICollection<Invoice> Invoices { get; set; }
         public virtual ICollection<MedicalRecord> MedicalRecords { get; set; }
         public virtual ICollection<ParticipatingTrainingCourse> ParticipatingTrainingCourses { get; set; }
+        public virtual ICollection<Prescription> Prescriptions { get; set; }
     }
 }

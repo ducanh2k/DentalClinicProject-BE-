@@ -8,6 +8,7 @@ namespace DentalClinicProject.Models
         public int Id { get; set; }
         public int? PatientId { get; set; }
         public string? CommentDetail { get; set; }
+        public bool? DeleteFlag { get; set; }
 
         public virtual User? Patient { get; set; }
     }

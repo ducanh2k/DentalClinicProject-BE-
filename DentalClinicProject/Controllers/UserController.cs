@@ -161,7 +161,6 @@ namespace DentalClinicProject.Controllers
                 return NotFound();
             }
                 user.Name = userDTO.Name;
-                user.DateCreated = DateTime.Now;
                 user.Phone = userDTO.Phone;
                 user.Email = userDTO.Email;
                 user.Img = userDTO.Img;
