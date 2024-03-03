@@ -10,7 +10,7 @@ namespace DentalClinicProject.Models
         public int? MedicineId { get; set; }
         public int? Quantity { get; set; }
         public string? DosageInstruction { get; set; }
-        public string? DeleteFlag { get; set; }
+        public bool? DeleteFlag { get; set; }
 
         public virtual Medicine? Medicine { get; set; }
         public virtual Prescription? Prescription { get; set; }

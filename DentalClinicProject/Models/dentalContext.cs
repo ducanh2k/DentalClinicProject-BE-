@@ -368,10 +368,7 @@ namespace DentalClinicProject.Models
 
                 entity.Property(e => e.PrescriptionDetailId).HasColumnName("prescriptionDetail_id");
 
-                entity.Property(e => e.DeleteFlag)
-                    .HasMaxLength(10)
-                    .HasColumnName("delete_flag")
-                    .IsFixedLength();
+                entity.Property(e => e.DeleteFlag).HasColumnName("delete_flag");
 
                 entity.Property(e => e.DosageInstruction)
                     .HasMaxLength(1000)

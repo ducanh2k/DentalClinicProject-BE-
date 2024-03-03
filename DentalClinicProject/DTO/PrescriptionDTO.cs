@@ -18,6 +18,6 @@
         public string? MedicineName { get; set; }
         public int? Quantity { get; set; }
         public string? DosageInstruction { get; set; }
-        public string? DeleteFlag { get; set; }
+        public bool? DeleteFlag { get; set; }
     }
 }
