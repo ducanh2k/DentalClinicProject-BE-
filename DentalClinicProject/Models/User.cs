@@ -16,6 +16,7 @@ namespace DentalClinicProject.Models
             ForeignLanguages = new HashSet<ForeignLanguage>();
             Invoices = new HashSet<Invoice>();
             MedicalRecords = new HashSet<MedicalRecord>();
+            News = new HashSet<News>();
             ParticipatingTrainingCourses = new HashSet<ParticipatingTrainingCourse>();
             Prescriptions = new HashSet<Prescription>();
         }
@@ -42,6 +43,7 @@ namespace DentalClinicProject.Models
         public virtual ICollection<ForeignLanguage> ForeignLanguages { get; set; }
         public virtual ICollection<Invoice> Invoices { get; set; }
         public virtual ICollection<MedicalRecord> MedicalRecords { get; set; }
+        public virtual ICollection<News> News { get; set; }
         public virtual ICollection<ParticipatingTrainingCourse> ParticipatingTrainingCourses { get; set; }
         public virtual ICollection<Prescription> Prescriptions { get; set; }
     }

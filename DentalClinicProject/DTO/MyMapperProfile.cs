@@ -28,6 +28,9 @@ namespace DentalClinicProject.DTO
             CreateMap<MedicalRecordDetail, MedicalRecordDetailDTO>()
                 .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(source => source.Service.ServiceName))
                 ;
+            CreateMap<News, NewsDTO>()
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(source => source.AuthorNavigation.Name))
+                ;
         }
     }
 }

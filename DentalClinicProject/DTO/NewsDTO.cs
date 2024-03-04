@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace DentalClinicProject.Models
+﻿namespace DentalClinicProject.DTO
 {
-    public partial class News
+    public class NewsDTO
     {
         public int Id { get; set; }
         public string? Tittle { get; set; }
         public string? BriefInfo { get; set; }
         public string? Description { get; set; }
         public int? Author { get; set; }
+        public string? AuthorName { get; set; }
         public DateTime? CreatedAt { get; set; }
         public bool? DeleteFlag { get; set; }
         public bool? Featured { get; set; }
-
-        public virtual User? AuthorNavigation { get; set; }
     }
 }

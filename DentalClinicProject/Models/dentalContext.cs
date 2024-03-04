@@ -309,7 +309,7 @@ namespace DentalClinicProject.Models
                 entity.Property(e => e.Author).HasColumnName("author");
 
                 entity.Property(e => e.BriefInfo)
-                    .HasMaxLength(50)
+                    .HasColumnType("text")
                     .HasColumnName("brief_info");
 
                 entity.Property(e => e.CreatedAt)
@@ -325,8 +325,13 @@ namespace DentalClinicProject.Models
                 entity.Property(e => e.Featured).HasColumnName("featured");
 
                 entity.Property(e => e.Tittle)
-                    .HasMaxLength(50)
+                    .HasColumnType("text")
                     .HasColumnName("tittle");
+
+                entity.HasOne(d => d.AuthorNavigation)
+                    .WithMany(p => p.News)
+                    .HasForeignKey(d => d.Author)
+                    .HasConstraintName("FK_News_User");
             });
 
             modelBuilder.Entity<ParticipatingTrainingCourse>(entity =>
