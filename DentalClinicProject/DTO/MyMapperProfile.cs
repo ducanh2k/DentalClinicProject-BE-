@@ -31,6 +31,9 @@ namespace DentalClinicProject.DTO
             CreateMap<News, NewsDTO>()
                 .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(source => source.AuthorNavigation.Name))
                 ;
+            CreateMap<Comment, CommentDTO>()
+                .ForMember(dest => dest.PatientName, opt => opt.MapFrom(source => source.Patient.Name))
+                ;
         }
     }
 }

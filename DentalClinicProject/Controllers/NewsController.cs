@@ -37,6 +37,7 @@ namespace DentalClinicProject.Controllers
             var News = _context.News
                         .Include(a => a.AuthorNavigation)
                         .Where(s => s.DeleteFlag == false)
+                        .OrderByDescending(a => a.CreatedAt)
                         .Skip((pageNumber - 1) * PageSize)
                         .Take(PageSize)
                         .ToList();
@@ -67,17 +68,18 @@ namespace DentalClinicProject.Controllers
             if (pageNumber <= 0) pageNumber = 1;
             if (pageNumber > totalPages) pageNumber = totalPages;
             var News = _context.News
-    .Include(a => a.AuthorNavigation)
-    .Where(s =>
-        (EF.Functions.Like(s.Tittle, $"%{keyword}%") ||
-        EF.Functions.Like(s.BriefInfo, $"%{keyword}%") ||
-        EF.Functions.Like(s.Description, $"%{keyword}%")) ||
-         EF.Functions.Like(s.AuthorNavigation.Name, $"%{keyword}%")
-        && s.DeleteFlag == false
-    )
-    .Skip((pageNumber - 1) * PageSize)
-    .Take(PageSize)
-    .ToList();
+            .Include(a => a.AuthorNavigation)
+            .Where(s =>
+                (EF.Functions.Like(s.Tittle, $"%{keyword}%") ||
+                EF.Functions.Like(s.BriefInfo, $"%{keyword}%") ||
+                EF.Functions.Like(s.Description, $"%{keyword}%")) ||
+                 EF.Functions.Like(s.AuthorNavigation.Name, $"%{keyword}%")
+                && s.DeleteFlag == false
+            )
+            .OrderByDescending(a => a.CreatedAt)
+            .Skip((pageNumber - 1) * PageSize)
+            .Take(PageSize)
+            .ToList();
 
 
 

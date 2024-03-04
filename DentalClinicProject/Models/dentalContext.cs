@@ -111,6 +111,10 @@ namespace DentalClinicProject.Models
 
                 entity.Property(e => e.CommentDetail).HasColumnName("commentDetail");
 
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnType("datetime")
+                    .HasColumnName("created_at");
+
                 entity.Property(e => e.DeleteFlag).HasColumnName("delete_flag");
 
                 entity.Property(e => e.PatientId).HasColumnName("patient_id");
