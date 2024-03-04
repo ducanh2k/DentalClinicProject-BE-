@@ -7,7 +7,7 @@ namespace DentalClinicProject.Models
     {
         public Service()
         {
-            MedicalRecords = new HashSet<MedicalRecord>();
+            MedicalRecordDetails = new HashSet<MedicalRecordDetail>();
         }
 
         public int ServiceId { get; set; }
@@ -17,6 +17,6 @@ namespace DentalClinicProject.Models
         public double? Price { get; set; }
         public bool? DeleteFlag { get; set; }
 
-        public virtual ICollection<MedicalRecord> MedicalRecords { get; set; }
+        public virtual ICollection<MedicalRecordDetail> MedicalRecordDetails { get; set; }
     }
 }

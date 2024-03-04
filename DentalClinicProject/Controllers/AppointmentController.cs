@@ -1,4 +1,5 @@
-﻿using DentalClinicProject.DTO;
+﻿using AutoMapper;
+using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,28 +13,102 @@ namespace DentalClinicProject.Controllers
     [ApiController]
     public class AppointmentController : ControllerBase
     {
+        IMapper _mapper;
         private readonly dentalContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly int PageSize;
 
-        public AppointmentController(dentalContext context)
+        public AppointmentController(dentalContext context, IMapper mapper, IConfiguration configuration)
         {
             _context = context;
+            _mapper = mapper;
+            _configuration = configuration;
+            PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
         }
 
         [HttpGet("list")]
-        public IActionResult GetAppointments()
+        public IActionResult GetAppointments(int pageNumber)
         {
-            var appointments = _context.Appointments.ToList();
+            var totalAppointments = _context.Appointments
+                              .Count(s => s.DeleteFlag == false);
+
+            var totalPages = (int)Math.Ceiling((double)totalAppointments / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+            var appointments = _context.Appointments
+                .Include(u => u.Employee)
+                .Include(u => u.Patient)
+                .Include(u => u.Doctor)
+                .Where(s => s.DeleteFlag == false)
+                .Skip((pageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
             if (appointments == null || appointments.Count == 0)
             {
                 return NotFound("Không có cuộc hẹn nào");
             }
-            return Ok(appointments);
+            List<AppointmentDTO> results = new List<AppointmentDTO>();
+            results = appointments.Select(_mapper.Map<Appointment, AppointmentDTO>).ToList();
+            return Ok(results);
         }
 
-        [HttpGet("search")]
-        public IActionResult GetAppointmentsByPatientName(string patientName)
+        [HttpGet("{id}")]
+        public IActionResult GetAppointment(int id)
         {
-            return NotFound("Không có cuộc hẹn nào phù hợp");
+            var appointment = _context.Appointments
+                .Include(u => u.Employee)
+                .Include(u => u.Patient)
+                .Include(u => u.Doctor)
+                .FirstOrDefault(s => s.DeleteFlag == false && s.AppointmentId == id);
+
+            if (appointment == null)
+            {
+                return NotFound("Không có cuộc hẹn nào");
+            }
+
+            AppointmentDTO result = _mapper.Map<Appointment, AppointmentDTO>(appointment);
+            return Ok(result);
+        }
+
+
+
+        [HttpGet("search")]
+        public IActionResult GetAppointmentsBySearch(string keyword, int pageNumber)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return BadRequest("Từ khóa tìm kiếm không được để trống");
+            }
+
+            var totalAppointments = _context.Appointments
+                              .Count(s => s.DeleteFlag == false);
+
+            var totalPages = (int)Math.Ceiling((double)totalAppointments / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+            var appointments = _context.Appointments
+                .Include(u => u.Employee)
+                .Include(u => u.Patient)
+                .Include(u => u.Doctor)
+                .Where(
+                s => s.Patient.Name.Contains(keyword)
+                || s.Employee.Name.Contains(keyword)
+                || s.Doctor.Name.Contains(keyword)
+                || s.Note.Contains(keyword)
+                && s.DeleteFlag == false
+                )
+                .Skip((pageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            if (appointments == null || appointments.Count == 0)
+            {
+                return NotFound("Không có cuộc hẹn nào");
+            }
+            List<AppointmentDTO> results = new List<AppointmentDTO>();
+            results = appointments.Select(_mapper.Map<Appointment, AppointmentDTO>).ToList();
+            return Ok(results);
         }
 
         [HttpPost]
@@ -43,9 +118,11 @@ namespace DentalClinicProject.Controllers
             {
                 EmployeeId = appointmentDTO.EmployeeId,
                 PatientId = appointmentDTO.PatientId,
-                Datetime = appointmentDTO.Datetime,
+                DoctorId = appointmentDTO.DoctorId,
+                Datetime = DateTime.Now,
                 Note = appointmentDTO.Note,
-                Status = appointmentDTO.Status
+                Status = "1",
+                DeleteFlag = false
             };
 
             try
@@ -71,10 +148,10 @@ namespace DentalClinicProject.Controllers
 
             appointment.EmployeeId = appointmentDTO.EmployeeId;
             appointment.PatientId = appointmentDTO.PatientId;
-            appointment.Datetime = appointmentDTO.Datetime;
+            appointment.DoctorId = appointmentDTO.DoctorId;
             appointment.Note = appointmentDTO.Note;
             appointment.Status = appointmentDTO.Status;
-
+            appointment.DeleteFlag = appointmentDTO.DeleteFlag;
             _context.SaveChanges();
             return NoContent();
         }
@@ -88,7 +165,7 @@ namespace DentalClinicProject.Controllers
                 return NotFound();
             }
 
-            _context.Remove(appointment);
+            appointment.DeleteFlag = true;
             _context.SaveChanges();
             return NoContent();
         }

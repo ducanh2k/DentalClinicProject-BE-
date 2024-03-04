@@ -5,17 +5,16 @@ namespace DentalClinicProject.Models
 {
     public partial class MedicalRecord
     {
-        public int RecordId { get; set; }
+        public MedicalRecord()
+        {
+            MedicalRecordDetails = new HashSet<MedicalRecordDetail>();
+        }
+
+        public int MedicalRecordId { get; set; }
         public int? PatientId { get; set; }
-        public int? AppointmentId { get; set; }
-        public int? ServiceId { get; set; }
-        public int? PrescriptionId { get; set; }
-        public string? Diagnosis { get; set; }
         public bool? DeleteFlag { get; set; }
 
-        public virtual Appointment? Appointment { get; set; }
         public virtual User? Patient { get; set; }
-        public virtual Prescription? Prescription { get; set; }
-        public virtual Service? Service { get; set; }
+        public virtual ICollection<MedicalRecordDetail> MedicalRecordDetails { get; set; }
     }
 }
