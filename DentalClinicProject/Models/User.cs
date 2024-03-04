@@ -7,6 +7,7 @@ namespace DentalClinicProject.Models
     {
         public User()
         {
+            AppointmentDoctors = new HashSet<Appointment>();
             AppointmentEmployees = new HashSet<Appointment>();
             AppointmentPatients = new HashSet<Appointment>();
             AreasOfExpertises = new HashSet<AreasOfExpertise>();
@@ -32,6 +33,7 @@ namespace DentalClinicProject.Models
         public bool? DeleteFlag { get; set; }
 
         public virtual Role? RoleNavigation { get; set; }
+        public virtual ICollection<Appointment> AppointmentDoctors { get; set; }
         public virtual ICollection<Appointment> AppointmentEmployees { get; set; }
         public virtual ICollection<Appointment> AppointmentPatients { get; set; }
         public virtual ICollection<AreasOfExpertise> AreasOfExpertises { get; set; }

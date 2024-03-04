@@ -14,6 +14,7 @@ namespace DentalClinicProject.DTO
             CreateMap<Appointment, AppointmentDTO>()
                 .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(source => source.Employee.Name))
                 .ForMember(dest => dest.PatientName, opt => opt.MapFrom(source => source.Patient.Name))
+                .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(source => source.Doctor.Name))
                 ;
             CreateMap<Prescription, PrescriptionDTO>()
                 .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(source => source.Doctor.Name))

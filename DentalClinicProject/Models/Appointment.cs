@@ -18,7 +18,9 @@ namespace DentalClinicProject.Models
         public string? Note { get; set; }
         public string? Status { get; set; }
         public bool? DeleteFlag { get; set; }
+        public int? DoctorId { get; set; }
 
+        public virtual User? Doctor { get; set; }
         public virtual User? Employee { get; set; }
         public virtual User? Patient { get; set; }
         public virtual ICollection<Invoice> Invoices { get; set; }

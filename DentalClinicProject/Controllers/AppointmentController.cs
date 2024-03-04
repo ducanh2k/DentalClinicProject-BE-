@@ -39,6 +39,7 @@ namespace DentalClinicProject.Controllers
             var appointments = _context.Appointments
                 .Include(u => u.Employee)
                 .Include(u => u.Patient)
+                .Include(u => u.Doctor)
                 .Where(s => s.DeleteFlag == false)
                 .Skip((pageNumber - 1) * PageSize)
                 .Take(PageSize)
@@ -58,6 +59,7 @@ namespace DentalClinicProject.Controllers
             var appointment = _context.Appointments
                 .Include(u => u.Employee)
                 .Include(u => u.Patient)
+                .Include(u => u.Doctor)
                 .FirstOrDefault(s => s.DeleteFlag == false && s.AppointmentId == id);
 
             if (appointment == null)
@@ -89,12 +91,13 @@ namespace DentalClinicProject.Controllers
             var appointments = _context.Appointments
                 .Include(u => u.Employee)
                 .Include(u => u.Patient)
+                .Include(u => u.Doctor)
                 .Where(
                 s => s.Patient.Name.Contains(keyword)
-                ||s.Employee.Name.Contains(keyword)
-                ||s.Note.Contains(keyword)
+                || s.Employee.Name.Contains(keyword)
+                || s.Doctor.Name.Contains(keyword)
+                || s.Note.Contains(keyword)
                 && s.DeleteFlag == false
-                
                 )
                 .Skip((pageNumber - 1) * PageSize)
                 .Take(PageSize)
@@ -115,6 +118,7 @@ namespace DentalClinicProject.Controllers
             {
                 EmployeeId = appointmentDTO.EmployeeId,
                 PatientId = appointmentDTO.PatientId,
+                DoctorId = appointmentDTO.DoctorId,
                 Datetime = DateTime.Now,
                 Note = appointmentDTO.Note,
                 Status = "1",
@@ -144,6 +148,7 @@ namespace DentalClinicProject.Controllers
 
             appointment.EmployeeId = appointmentDTO.EmployeeId;
             appointment.PatientId = appointmentDTO.PatientId;
+            appointment.DoctorId = appointmentDTO.DoctorId;
             appointment.Note = appointmentDTO.Note;
             appointment.Status = appointmentDTO.Status;
             appointment.DeleteFlag = appointmentDTO.DeleteFlag;

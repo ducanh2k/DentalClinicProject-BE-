@@ -57,6 +57,8 @@ namespace DentalClinicProject.Models
 
                 entity.Property(e => e.DeleteFlag).HasColumnName("delete_flag");
 
+                entity.Property(e => e.DoctorId).HasColumnName("doctor_id");
+
                 entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
 
                 entity.Property(e => e.Note)
@@ -68,6 +70,11 @@ namespace DentalClinicProject.Models
                 entity.Property(e => e.Status)
                     .HasMaxLength(50)
                     .HasColumnName("status");
+
+                entity.HasOne(d => d.Doctor)
+                    .WithMany(p => p.AppointmentDoctors)
+                    .HasForeignKey(d => d.DoctorId)
+                    .HasConstraintName("FK_Appointment_User2");
 
                 entity.HasOne(d => d.Employee)
                     .WithMany(p => p.AppointmentEmployees)
