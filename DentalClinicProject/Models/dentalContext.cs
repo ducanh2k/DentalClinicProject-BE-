@@ -328,6 +328,8 @@ namespace DentalClinicProject.Models
 
                 entity.Property(e => e.Featured).HasColumnName("featured");
 
+                entity.Property(e => e.Img).HasColumnName("img");
+
                 entity.Property(e => e.Tittle)
                     .HasColumnType("text")
                     .HasColumnName("tittle");

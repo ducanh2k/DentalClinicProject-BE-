@@ -72,7 +72,35 @@ namespace DentalClinicProject.Controllers
             // Truy vấn cơ sở dữ liệu để lấy tất cả các hồ sơ y tế của bệnh nhân
             var medicalRecords = _context.MedicalRecords
                 .Include(mr => mr.Patient)
+                .Include(mr => mr.MedicalRecordDetails)
+                    .ThenInclude(md => md.Appointment)
+                .Include(mr => mr.MedicalRecordDetails)
+                    .ThenInclude(md => md.Prescription)
+                .Include(mr => mr.MedicalRecordDetails)
+                    .ThenInclude(md => md.Service)
                 .Where(mr => mr.PatientId == patientId && mr.DeleteFlag == false)
+                .Select( m => new
+                {
+                    MedicalRecord = new 
+                    {
+                    m.MedicalRecordId,
+                    m.PatientId,
+                    PatientName = m.Patient.Name,
+                    m.DeleteFlag
+                    },
+                    MedicalRecordDetails = m.MedicalRecordDetails.Select(o => new
+                    {
+                        o.MrDetailId,
+                        o.AppointmentId,
+                        o.ServiceId,
+                        ServiceName = o.Service.ServiceName,
+                        o.PrescriptionId,
+                        o.Diagnosis
+                    }
+                    )
+                    
+                }
+                )
                 .ToList();
 
 
@@ -82,9 +110,9 @@ namespace DentalClinicProject.Controllers
                 return NotFound("Không có hồ sơ y tế nào cho bệnh nhân này");
             }
           
-            var medicalRecordDTOs = _mapper.Map<List<MedicalRecordDTO>>(medicalRecords);
+            //var medicalRecordDTOs = _mapper.Map<List<MedicalRecordDTO>>(medicalRecords);
 
-            return Ok(medicalRecordDTOs);
+            return Ok(medicalRecords);
         }
 
 
