@@ -8,7 +8,6 @@ namespace DentalClinicProject.Models
         public Appointment()
         {
             Invoices = new HashSet<Invoice>();
-            MedicalRecordDetails = new HashSet<MedicalRecordDetail>();
         }
 
         public int AppointmentId { get; set; }
@@ -19,11 +18,12 @@ namespace DentalClinicProject.Models
         public string? Status { get; set; }
         public bool? DeleteFlag { get; set; }
         public int? DoctorId { get; set; }
+        public int? MedicalRecordDetailId { get; set; }
 
         public virtual User? Doctor { get; set; }
         public virtual User? Employee { get; set; }
+        public virtual MedicalRecordDetail? MedicalRecordDetail { get; set; }
         public virtual User? Patient { get; set; }
         public virtual ICollection<Invoice> Invoices { get; set; }
-        public virtual ICollection<MedicalRecordDetail> MedicalRecordDetails { get; set; }
     }
 }

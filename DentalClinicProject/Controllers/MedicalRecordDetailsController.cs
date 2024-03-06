@@ -74,7 +74,6 @@ namespace DentalClinicProject.Controllers
             var MedicalRecordDetail = new MedicalRecordDetail
             {
                 MedicalRecordId = MedicalRecordDetailDTO.MedicalRecordId,
-                AppointmentId = MedicalRecordDetailDTO.AppointmentId,
                 ServiceId = MedicalRecordDetailDTO.ServiceId,
                 PrescriptionId = MedicalRecordDetailDTO.PrescriptionId,
                 Diagnosis = MedicalRecordDetailDTO.Diagnosis,
@@ -101,7 +100,6 @@ namespace DentalClinicProject.Controllers
                 return NotFound();
             }
             MedicalRecordDetail.MedicalRecordId = MedicalRecordDetailDTO.MedicalRecordId;
-            MedicalRecordDetail.AppointmentId = MedicalRecordDetailDTO.AppointmentId;
             MedicalRecordDetail.ServiceId = MedicalRecordDetailDTO.ServiceId;
             MedicalRecordDetail.PrescriptionId = MedicalRecordDetailDTO.PrescriptionId;
             MedicalRecordDetail.Diagnosis = MedicalRecordDetailDTO.Diagnosis;

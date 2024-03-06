@@ -61,6 +61,8 @@ namespace DentalClinicProject.Models
 
                 entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
 
+                entity.Property(e => e.MedicalRecordDetailId).HasColumnName("medicalRecordDetail_id");
+
                 entity.Property(e => e.Note)
                     .HasMaxLength(100)
                     .HasColumnName("note");
@@ -80,6 +82,11 @@ namespace DentalClinicProject.Models
                     .WithMany(p => p.AppointmentEmployees)
                     .HasForeignKey(d => d.EmployeeId)
                     .HasConstraintName("FK_Appointment_User");
+
+                entity.HasOne(d => d.MedicalRecordDetail)
+                    .WithMany(p => p.Appointments)
+                    .HasForeignKey(d => d.MedicalRecordDetailId)
+                    .HasConstraintName("FK_Appointment_MedicalRecord Details");
 
                 entity.HasOne(d => d.Patient)
                     .WithMany(p => p.AppointmentPatients)
@@ -234,8 +241,6 @@ namespace DentalClinicProject.Models
 
                 entity.Property(e => e.MrDetailId).HasColumnName("mr_detail_id");
 
-                entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
-
                 entity.Property(e => e.DeleteFlag).HasColumnName("delete_flag");
 
                 entity.Property(e => e.Diagnosis)
@@ -247,11 +252,6 @@ namespace DentalClinicProject.Models
                 entity.Property(e => e.PrescriptionId).HasColumnName("prescription_id");
 
                 entity.Property(e => e.ServiceId).HasColumnName("service_id");
-
-                entity.HasOne(d => d.Appointment)
-                    .WithMany(p => p.MedicalRecordDetails)
-                    .HasForeignKey(d => d.AppointmentId)
-                    .HasConstraintName("FK_MedicalRecord Details_Appointment");
 
                 entity.HasOne(d => d.MedicalRecord)
                     .WithMany(p => p.MedicalRecordDetails)

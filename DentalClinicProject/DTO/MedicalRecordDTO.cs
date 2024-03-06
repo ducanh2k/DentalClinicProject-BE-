@@ -13,7 +13,6 @@
     {
         public int MrDetailId { get; set; }
         public int? MedicalRecordId { get; set; }
-        public int? AppointmentId { get; set; }
         public int? ServiceId { get; set; }
         public string? ServiceName { get; set; }
         public int? PrescriptionId { get; set; }
