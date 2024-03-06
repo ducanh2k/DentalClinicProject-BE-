@@ -116,6 +116,7 @@ namespace DentalClinicProject.Controllers
         {
             var appointment = new Appointment
             {
+                MedicalRecordDetailId = appointmentDTO.MedicalRecordDetailId,
                 EmployeeId = appointmentDTO.EmployeeId,
                 PatientId = appointmentDTO.PatientId,
                 DoctorId = appointmentDTO.DoctorId,
@@ -145,7 +146,7 @@ namespace DentalClinicProject.Controllers
             {
                 return NotFound();
             }
-
+            appointment.MedicalRecordDetailId = appointmentDTO.MedicalRecordDetailId;
             appointment.EmployeeId = appointmentDTO.EmployeeId;
             appointment.PatientId = appointmentDTO.PatientId;
             appointment.DoctorId = appointmentDTO.DoctorId;

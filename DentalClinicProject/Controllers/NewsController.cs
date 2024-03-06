@@ -118,6 +118,7 @@ namespace DentalClinicProject.Controllers
             var New = new News
             {
                 Tittle = newsDTO.Tittle,
+                Img = newsDTO.Img,
                 BriefInfo = newsDTO.BriefInfo,
                 Description = newsDTO.Description,
                 Author = newsDTO.Author,
@@ -148,6 +149,7 @@ namespace DentalClinicProject.Controllers
             try
             {
                 New.Tittle = newsDTO.Tittle;
+                New.Img = newsDTO.Img;
                 New.BriefInfo = newsDTO.BriefInfo;
                 New.Description = newsDTO.Description;
                 New.Author = newsDTO.Author;

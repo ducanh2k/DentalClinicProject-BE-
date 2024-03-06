@@ -86,15 +86,35 @@ namespace DentalClinicProject.Controllers
             
             var prescriptions = _context.Prescriptions
                 .Include(d => d.Doctor)
-                .FirstOrDefault(x => x.PrescriptionId == id);
+                .Where(x => x.PrescriptionId == id)
+                .Select(p => new
+                {
+                    Prescription = new
+                    {
+                        p.PrescriptionId,
+                        p.CreatedDate,
+                        p.DoctorId,
+                        DoctorName = p.Doctor.Name,
+                        p.Note,
+                        p.DeleteFlag
+                    },
+                    PrescriptionDetail = p.PrescriptionDetails.Select(pd => new
+                    {
+                        pd.PrescriptionDetailId,
+                        pd.PrescriptionId,
+                        pd.MedicineId,
+                        MedicineName = pd.Medicine.Name,
+                        pd.DosageInstruction,
+                        pd.DeleteFlag
+                    })
+                })
+                ;
             if (prescriptions == null )
             {
                 return NotFound("Không có đơn thuốc");
             }
 
-            //map
-            var results = _mapper.Map<PrescriptionDTO>(prescriptions);
-            return Ok(results);
+            return Ok(prescriptions);
         }
 
         [HttpPost]

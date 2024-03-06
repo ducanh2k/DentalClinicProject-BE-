@@ -13,6 +13,7 @@ namespace DentalClinicProject.Models
         public DateTime? CreatedAt { get; set; }
         public bool? DeleteFlag { get; set; }
         public bool? Featured { get; set; }
+        public string? Img { get; set; }
 
         public virtual User? AuthorNavigation { get; set; }
     }
