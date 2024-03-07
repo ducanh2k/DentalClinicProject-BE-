@@ -10,7 +10,7 @@ using System.Runtime.ConstrainedExecution;
 
 namespace DentalClinicProject.Controllers
 {
-    [Authorize]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class AppointmentController : ControllerBase
@@ -28,6 +28,7 @@ namespace DentalClinicProject.Controllers
             PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
         }
 
+        [Authorize]
         [HttpGet("list")]
         public IActionResult GetAppointments(int pageNumber)
         {
