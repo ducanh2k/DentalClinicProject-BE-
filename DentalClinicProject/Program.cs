@@ -2,6 +2,7 @@ using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
 using DentalClinicProject.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -45,7 +46,13 @@ builder.Services.AddAuthentication(options =>
      };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(opt =>
+{
+    var builder = new AuthorizationPolicyBuilder();
+    builder.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+    builder.RequireAuthenticatedUser();
+    opt.DefaultPolicy = builder.Build();
+});
 
 var app = builder.Build();
 
