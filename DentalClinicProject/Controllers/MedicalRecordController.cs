@@ -60,6 +60,9 @@ namespace DentalClinicProject.Controllers
                     .ThenInclude(md => md.Prescription)
                 .Include(mr => mr.MedicalRecordDetails)
                     .ThenInclude(md => md.Service)
+                .Include(mr => mr.MedicalRecordDetails)
+                    .ThenInclude(md => md.Appointments) // Include appointments
+                    .ThenInclude(appointment => appointment.Doctor) // Include doctor of the appointment
                 .Where(mr => mr.MedicalRecordId == id && mr.DeleteFlag == false)
                 .Select(m => new
                 {
@@ -77,7 +80,11 @@ namespace DentalClinicProject.Controllers
                         o.ServiceId,
                         ServiceName = o.Service.ServiceName,
                         o.PrescriptionId,
-                        o.Diagnosis
+                        o.Diagnosis,
+                        Appointments = o.Appointments.Select(appointment => new
+                        {
+                            appointment.AppointmentId
+                        })
                     }
                     )
 
@@ -124,7 +131,20 @@ namespace DentalClinicProject.Controllers
                         o.ServiceId,
                         ServiceName = o.Service.ServiceName,
                         o.PrescriptionId,
-                        o.Diagnosis
+                        o.Diagnosis,
+                        Appointments = o.Appointments.Select(appointment => new
+                        {
+                            appointment.AppointmentId,
+                            appointment.EmployeeId,
+                            EmployeeName = appointment.Employee.Name,
+                            appointment.PatientId,
+                            appointment.Datetime,
+                            appointment.Note,
+                            appointment.Status,
+                            appointment.DeleteFlag,
+                            appointment.DoctorId,
+                            DoctorName = appointment.Doctor.Name,
+                        })
                     }
                     )
                     
