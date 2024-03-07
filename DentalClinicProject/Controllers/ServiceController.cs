@@ -1,5 +1,6 @@
 ﻿  using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -125,7 +126,7 @@ namespace DentalClinicProject.Controllers
                 return BadRequest("Thêm mới dịch vụ thất bại");
             }
         }
-
+        
         [HttpPut("{id}")]
         public ActionResult UpdateService(int id, ServiceDTO serDTO)
         {

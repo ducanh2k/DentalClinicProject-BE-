@@ -30,7 +30,11 @@ namespace DentalClinicProject.Models
         public string? Description { get; set; }
         public double? Salary { get; set; }
         public int? Role { get; set; }
-        public string? Password { get; set; }
+        public byte[] PasswordHash { get; set; }
+        public byte[] PasswordSalt { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? TokenCreated { get; set; }
+        public DateTime? TokenExpires { get; set; }
         public bool? DeleteFlag { get; set; }
 
         public virtual Role? RoleNavigation { get; set; }
