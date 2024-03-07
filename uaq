@@ -1,0 +1,64 @@
+[33m3cc33d3[m[33m ([m[1;36mHEAD -> [m[1;32mauthor-update[m[33m, [m[1;32mmaster[m[33m)[m Merge branch 'master' of github.com:ducanh2k/DentalClinicProject-BE-
+[33m83d8305[m Merge pull request #13 from ducanh2k/lamlam
+[33mbf14b89[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #14 from ducanh2k/authen-author
+[33mc6bce75[m[33m ([m[1;31morigin/authen-author[m[33m, [m[1;32mauthen-author[m[33m)[m update
+[33m6b2ebe4[m add jwtbear
+[33m7e60102[m[33m ([m[1;32mupdate-author[m[33m)[m Merge pull request #13 from ducanh2k/lamlam
+[33mabdc79f[m 7/3 lam v1
+[33mb7ff1d9[m update medical record
+[33m90091db[m update db
+[33mc49cd8c[m Merge pull request #12 from ducanh2k/lamlam
+[33m79a3e62[m 6/3 v2
+[33m41ff53f[m 6/3 lam v1
+[33m63f54c5[m 5/3 fix MedicalRecord, add News img
+[33m0b48fb7[m ok
+[33m84de42d[m 4/3 CRUD Comment
+[33m3b75d43[m 4/3 CRUD News
+[33m128db0d[m 4/3 fix CRUD Appointment
+[33m6924f72[m 3/3 CRUD MedicalRecord
+[33m09757b2[m 3/3 CRUD MedicalRecord details
+[33m6de25ab[m 3/3 add Crud Prescription
+[33m2997f70[m 3/3 fix CRUD Appointment
+[33mfbdf2e0[m 3/3 update model
+[33m036af7c[m cập nhật new db
+[33m1ef7ece[m thêm 1 thông tin cho user
+[33mf3d2028[m thêm trường thông tin cho user
+[33m9879e0c[m Merge pull request #10 from ducanh2k/lamlam
+[33m1e84462[m 29/2 add db ver 5
+[33m00f1520[m 29/2 fix CRUD Materials
+[33m459bfa2[m 29/2 lam v4
+[33m978172c[m 29/2 add CRUD aoe, language
+[33m688a768[m 29/2 add Crud Degree
+[33m903f029[m 29/2 update CRUD User
+[33mbed8723[m Merge pull request #8 from ducanh2k/lamlam
+[33m556cf56[m 28/2 db ver 4
+[33md8a9311[m 28/2 lamlam v4
+[33mb4c411b[m Merge pull request #7 from ducanh2k/lamlam
+[33m5624e73[m Merge branch 'master' into lamlam
+[33m5c18e56[m 28/2 lam v3
+[33m8157298[m 28/2 update id for user, service, medicine
+[33ma5c4224[m 28/2 update CRUD Service
+[33m3a87443[m 28/8 Update db
+[33m114b73a[m .
+[33m3c46678[m[33m ([m[1;32mlamlam[m[33m)[m .
+[33mc6a28fe[m .
+[33m4897f73[m Merge pull request #5 from ducanh2k/lamlam
+[33mf31ede1[m Merge pull request #3 from ducanh2k/revert-2-hungdv
+[33m38ad4d6[m[33m ([m[1;31morigin/lamlam[m[33m)[m 22/2 add CRUD User
+[33mbbfa1e5[m Merge pull request #4 from ducanh2k/dungtx-appoitment
+[33mbec21a0[m[33m ([m[1;31morigin/dungtx-appoitment[m[33m, [m[1;32mdungtx-appoitment[m[33m)[m appoitment v1
+[33me90cc19[m 22/2 add CRUD Material
+[33m725361e[m 22/2 add CRUD Medicine
+[33m3de8c5c[m Revert "Doing Login and Register"
+[33m80c1c66[m Merge pull request #2 from ducanh2k/hungdv
+[33m49e9fd0[m Doing Login and Register
+[33mb5effde[m 21/2 add MedicineController
+[33me23db90[m Merge pull request #1 from ducanh2k/lamlam
+[33mf68bb8a[m 20/2 CRUD Service
+[33m569d743[m 20/2 add Models
+[33m65b3149[m 20/02 update db
+[33m08c9b2b[m add database
+[33m32bc117[m fix name
+[33maa3160f[m initial project for example
+[33m087a06e[m Add project files.
+[33me10e3c4[m Add .gitattributes and .gitignore.

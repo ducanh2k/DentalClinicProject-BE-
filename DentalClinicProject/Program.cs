@@ -2,10 +2,7 @@ using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
 using DentalClinicProject.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-<<<<<<< HEAD
 using Microsoft.AspNetCore.Authorization;
-=======
->>>>>>> bf14b894a4f01b73cedac5937e15197027dd69d2
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
