@@ -14,7 +14,9 @@ namespace DentalClinicProject.DTO
         public int? RoleId { get; set; }
         public string? RoleName { get; set; }
         public bool? DeleteFlag { get; set; }
-        public string? Password { get; set; }
+        public String? password { get; set; }
+        public byte[]? PasswordHash { get; set; }
+        public byte[]? PasswordSalt { get; set; }
     }
 
     public partial class ForeignLanguageDTO

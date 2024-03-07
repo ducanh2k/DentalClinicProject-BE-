@@ -471,10 +471,25 @@ namespace DentalClinicProject.Models
                     .HasMaxLength(50)
                     .HasColumnName("name");
 
-                entity.Property(e => e.Password)
-                    .HasMaxLength(50)
-                    .HasColumnName("password")
-                    .IsFixedLength();
+                entity.Property(e => e.PasswordHash)
+                     .HasColumnType("varbinary(MAX)")
+                     .HasColumnName("password_hash");
+
+                entity.Property(e => e.PasswordSalt)
+                    .HasColumnType("varbinary(MAX)")
+                    .HasColumnName("password_salt");
+
+                entity.Property(e => e.RefreshToken)
+                    .HasMaxLength(100) // Adjust the length as needed
+                    .HasColumnName("refresh_token");
+
+                entity.Property(e => e.TokenCreated)
+                    .HasColumnType("datetime")
+                    .HasColumnName("token_created");
+
+                entity.Property(e => e.TokenExpires)
+                    .HasColumnType("datetime")
+                    .HasColumnName("token_expires");
 
                 entity.Property(e => e.Phone)
                     .HasMaxLength(11)

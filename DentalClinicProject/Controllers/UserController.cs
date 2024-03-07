@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace DentalClinicProject.Controllers
             PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
         }
 
-
+   
         //get all 
         [HttpGet("list")]
         public IActionResult GetUsers(int pageNumber)
@@ -106,7 +107,11 @@ namespace DentalClinicProject.Controllers
                 u.Img,
                 u.Description,
                 u.Salary,
-                u.Password,
+                u.PasswordHash,
+                u.PasswordSalt,
+                u.RefreshToken,
+                u.TokenCreated,
+                u.TokenExpires,
                 u.DeleteFlag,
                 u.Role,
                 RoleName = u.RoleNavigation.Name
@@ -137,7 +142,8 @@ namespace DentalClinicProject.Controllers
                 Description = userDTO.Description,
                 Salary = userDTO.Salary,
                 Role = userDTO.RoleId,
-                Password = userDTO.Password,
+                PasswordHash = userDTO.PasswordHash,
+                PasswordSalt = userDTO.PasswordSalt,
                 DeleteFlag = userDTO.DeleteFlag,
             };
             try
