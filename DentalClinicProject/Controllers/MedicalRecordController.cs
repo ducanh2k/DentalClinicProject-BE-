@@ -63,15 +63,16 @@ namespace DentalClinicProject.Controllers
                 .Where(mr => mr.MedicalRecordId == id && mr.DeleteFlag == false)
                 .Select(m => new
                 {
-                    MedicalRecord = new
-                    {
-                        m.MedicalRecordId,
-                        m.PatientId,
-                        PatientName = m.Patient.Name,
-                        m.DeleteFlag
-                    },
+                    //MedicalRecord = new
+                    //{
+                    //    m.MedicalRecordId,
+                    //    m.PatientId,
+                    //    PatientName = m.Patient.Name,
+                    //    m.DeleteFlag
+                    //},
                     MedicalRecordDetails = m.MedicalRecordDetails.Select(o => new
                     {
+                        o.MedicalRecordId,
                         o.MrDetailId,
                         o.ServiceId,
                         ServiceName = o.Service.ServiceName,
