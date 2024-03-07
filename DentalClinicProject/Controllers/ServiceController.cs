@@ -20,7 +20,8 @@ namespace DentalClinicProject.Controllers
             _configuration = configuration;
             PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
         }
-        //get all 
+        //get all
+        [Authorize]
         [HttpGet("list")]
         public IActionResult GetServices(int pageNumber)
         {
