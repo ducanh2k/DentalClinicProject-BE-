@@ -1,10 +1,14 @@
 ﻿  using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
+using DentalClinicProject.Services.UserService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Runtime.ConstrainedExecution;
+using System.Security.Claims;
 namespace DentalClinicProject.Controllers
 {
     [Route("api/[controller]")]
@@ -14,18 +18,24 @@ namespace DentalClinicProject.Controllers
         private readonly dentalContext _context;
         private readonly IConfiguration _configuration;
         private readonly int PageSize;
+        private readonly IUserService _userService;
 
-        public ServiceController(dentalContext context, IConfiguration configuration)
+        public ServiceController(dentalContext context, IConfiguration configuration, IUserService userService)
         {
             _context = context;
             _configuration = configuration;
             PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
+            _userService = userService;
         }
         //get all
-        [Authorize]
+
+
+        
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Doctor, Admin")]
         [HttpGet("list")]
         public IActionResult GetServices(int pageNumber)
         {
+            
             var totalServices = _context.Services
                               .Count(s => s.DeleteFlag == false);
 
