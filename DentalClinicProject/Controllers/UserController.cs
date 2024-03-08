@@ -35,13 +35,14 @@ namespace DentalClinicProject.Controllers
                               .Count(s => s.DeleteFlag == false);
 
             var totalPages = (int)Math.Ceiling((double)totalUsers / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
+            var getPageNumber = pageNumber;
+            if (pageNumber <= 0) getPageNumber += 1;
+            if (pageNumber > totalPages) getPageNumber = totalPages;
+            
             List<User> users = _context.Users
                 .Include(r => r.RoleNavigation)
                 .Where(x => x.DeleteFlag == false)
-                .Skip((pageNumber - 1) * PageSize)
+                .Skip((getPageNumber - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
             if (users == null || users.Count == 0)

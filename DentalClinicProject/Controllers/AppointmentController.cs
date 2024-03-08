@@ -28,7 +28,7 @@ namespace DentalClinicProject.Controllers
             PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
         }
 
-        [Authorize]
+        [Authorize(Roles = "Doctor")]
         [HttpGet("list")]
         public IActionResult GetAppointments(int pageNumber)
         {

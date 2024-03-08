@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿global using DentalClinicProject.Services.UserService;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using DentalClinicProject.Models;
 using DentalClinicProject.DTO;
-using DentalClinicProject.Services.UserService;
 using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -38,6 +38,7 @@ namespace DentalClinicProject.Controllers
             CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
 
             user.Email = request.Email;
+            user.Role = 1;
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
             try
@@ -56,10 +57,11 @@ namespace DentalClinicProject.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserDTO request)
         {
+            User user = null;
             user = _context.Users.Include(u => u.RoleNavigation)
                 .FirstOrDefault(o => o.Email == request.Email);
 
-            if (user.Email != request.Email)
+            if (user == null || user.Email != request.Email )
             {
                 return BadRequest(user);
             }
@@ -132,6 +134,7 @@ namespace DentalClinicProject.Controllers
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.RoleNavigation.Name)
             };
+
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
                 _configuration.GetSection("JWT:Secret").Value));

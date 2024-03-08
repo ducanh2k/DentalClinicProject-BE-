@@ -4,6 +4,7 @@ using DentalClinicProject.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 using Newtonsoft.Json.Serialization;
@@ -27,7 +28,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+
 })
 
 // Adding Jwt Bearer  
@@ -48,10 +49,10 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(opt =>
 {
-    var builder = new AuthorizationPolicyBuilder();
-    builder.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-    builder.RequireAuthenticatedUser();
-    opt.DefaultPolicy = builder.Build();
+    opt.DefaultPolicy = new AuthorizationPolicyBuilder()
+            .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser()
+            .Build();
 });
 
 var app = builder.Build();
