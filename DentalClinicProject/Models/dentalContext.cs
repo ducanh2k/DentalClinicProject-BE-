@@ -22,12 +22,14 @@ namespace DentalClinicProject.Models
         public virtual DbSet<Degree> Degrees { get; set; } = null!;
         public virtual DbSet<ForeignLanguage> ForeignLanguages { get; set; } = null!;
         public virtual DbSet<Invoice> Invoices { get; set; } = null!;
+        public virtual DbSet<InvoiceLine> InvoiceLines { get; set; } = null!;
         public virtual DbSet<Material> Materials { get; set; } = null!;
         public virtual DbSet<MedicalRecord> MedicalRecords { get; set; } = null!;
         public virtual DbSet<MedicalRecordDetail> MedicalRecordDetails { get; set; } = null!;
         public virtual DbSet<Medicine> Medicines { get; set; } = null!;
         public virtual DbSet<News> News { get; set; } = null!;
         public virtual DbSet<ParticipatingTrainingCourse> ParticipatingTrainingCourses { get; set; } = null!;
+        public virtual DbSet<Payment> Payments { get; set; } = null!;
         public virtual DbSet<Prescription> Prescriptions { get; set; } = null!;
         public virtual DbSet<PrescriptionDetail> PrescriptionDetails { get; set; } = null!;
         public virtual DbSet<Role> Roles { get; set; } = null!;
@@ -168,32 +170,48 @@ namespace DentalClinicProject.Models
             {
                 entity.ToTable("Invoice");
 
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.AppointmentId).HasColumnName("appointmentId");
+                entity.Property(e => e.Date).HasColumnType("datetime");
 
                 entity.Property(e => e.DeleteFlag).HasColumnName("delete_flag");
 
                 entity.Property(e => e.Discount).HasColumnName("discount");
 
-                entity.Property(e => e.PatientId).HasColumnName("patientId");
+                entity.HasOne(d => d.Customer)
+                    .WithMany(p => p.InvoiceCustomers)
+                    .HasForeignKey(d => d.CustomerId)
+                    .HasConstraintName("FK_Invoice_User1");
 
-                entity.Property(e => e.PrescriptionId).HasColumnName("prescriptionId");
-
-                entity.HasOne(d => d.Appointment)
+                entity.HasOne(d => d.Payment)
                     .WithMany(p => p.Invoices)
-                    .HasForeignKey(d => d.AppointmentId)
-                    .HasConstraintName("FK_Invoice_Appointment");
+                    .HasForeignKey(d => d.PaymentId)
+                    .HasConstraintName("FK_Invoice_Payment");
 
-                entity.HasOne(d => d.Patient)
-                    .WithMany(p => p.Invoices)
-                    .HasForeignKey(d => d.PatientId)
-                    .HasConstraintName("FK_Invoice_User");
+                entity.HasOne(d => d.Staff)
+                    .WithMany(p => p.InvoiceStaffs)
+                    .HasForeignKey(d => d.StaffId)
+                    .HasConstraintName("FK_Invoice_User2");
+            });
 
-                entity.HasOne(d => d.Prescription)
-                    .WithMany(p => p.Invoices)
-                    .HasForeignKey(d => d.PrescriptionId)
-                    .HasConstraintName("FK_Invoice_Prescription");
+            modelBuilder.Entity<InvoiceLine>(entity =>
+            {
+                entity.HasKey(e => e.LineId);
+
+                entity.Property(e => e.DeleteFlag).HasColumnName("delete_flag");
+
+                entity.HasOne(d => d.Invoice)
+                    .WithMany(p => p.InvoiceLines)
+                    .HasForeignKey(d => d.InvoiceId)
+                    .HasConstraintName("FK_InvoiceLines_Invoice");
+
+                entity.HasOne(d => d.Material)
+                    .WithMany(p => p.InvoiceLines)
+                    .HasForeignKey(d => d.MaterialId)
+                    .HasConstraintName("FK_InvoiceLines_Material");
+
+                entity.HasOne(d => d.Service)
+                    .WithMany(p => p.InvoiceLines)
+                    .HasForeignKey(d => d.ServiceId)
+                    .HasConstraintName("FK_InvoiceLines_Service");
             });
 
             modelBuilder.Entity<Material>(entity =>
@@ -354,6 +372,11 @@ namespace DentalClinicProject.Models
                     .WithMany(p => p.ParticipatingTrainingCourses)
                     .HasForeignKey(d => d.EmployeeId)
                     .HasConstraintName("FK_Participating_training_courses_User");
+            });
+
+            modelBuilder.Entity<Payment>(entity =>
+            {
+                entity.ToTable("Payment");
             });
 
             modelBuilder.Entity<Prescription>(entity =>
