@@ -126,10 +126,19 @@ namespace DentalClinicProject.Models
 
                 entity.Property(e => e.DeleteFlag).HasColumnName("delete_flag");
 
+                entity.Property(e => e.DoctorId).HasColumnName("doctor_id");
+
                 entity.Property(e => e.PatientId).HasColumnName("patient_id");
 
+                entity.Property(e => e.RatingStar).HasColumnName("rating_star");
+
+                entity.HasOne(d => d.Doctor)
+                    .WithMany(p => p.CommentDoctors)
+                    .HasForeignKey(d => d.DoctorId)
+                    .HasConstraintName("FK_comment_User1");
+
                 entity.HasOne(d => d.Patient)
-                    .WithMany(p => p.Comments)
+                    .WithMany(p => p.CommentPatients)
                     .HasForeignKey(d => d.PatientId)
                     .HasConstraintName("FK_comment_User");
             });

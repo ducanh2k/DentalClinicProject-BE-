@@ -10,7 +10,10 @@ namespace DentalClinicProject.Models
         public string? CommentDetail { get; set; }
         public bool? DeleteFlag { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public int? DoctorId { get; set; }
+        public int? RatingStar { get; set; }
 
+        public virtual User? Doctor { get; set; }
         public virtual User? Patient { get; set; }
     }
 }

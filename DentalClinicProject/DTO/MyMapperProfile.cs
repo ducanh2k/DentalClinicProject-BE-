@@ -33,6 +33,7 @@ namespace DentalClinicProject.DTO
                 ;
             CreateMap<Comment, CommentDTO>()
                 .ForMember(dest => dest.PatientName, opt => opt.MapFrom(source => source.Patient.Name))
+                .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(source => source.Doctor.Name))
                 ;
             CreateMap<Invoice, InvoiceDTO>()
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(source => source.Customer.Name))
