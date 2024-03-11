@@ -37,9 +37,21 @@ namespace DentalClinicProject.Controllers
         {
             CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
 
+
+            if (!request.IsValidRole())
+            {
+                return BadRequest(new { Error = "Vai trò không đúng đề nghị nhập lại" });
+            }
+
             user.Email = request.Email;
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
+            user.Phone = request.Phone;
+            user.Name = request.Name;
+            user.Description = request.Description;
+            user.Role = request.RoleId;
+            user.Salary = request.Salary;
+            user.DateCreated = DateTime.Now;
             try
             {
                 _context.Users.Add(user);
@@ -74,7 +86,10 @@ namespace DentalClinicProject.Controllers
             var refreshToken = GenerateRefreshToken();
             SetRefreshToken(refreshToken);
 
-            return Ok(token);
+            return Ok(new 
+            { Token = token, 
+              Role = user.RoleNavigation.Name
+            });
         }
 
         [HttpPost("refresh-token")]
@@ -142,7 +157,7 @@ namespace DentalClinicProject.Controllers
                 _configuration["JWT:ValidIssuer"],
                 _configuration["JWT:ValidAudience"],
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.Now.AddDays(7),
                 signingCredentials: creds);
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
