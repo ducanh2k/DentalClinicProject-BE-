@@ -372,5 +372,25 @@ namespace DentalClinicProject.Controllers
             _context.SaveChanges();
             return NoContent();
         }
-    }
+
+        //var invoiceLines = _context.InvoiceLines
+    //.Where(line => line.InvoiceId == 2) // Lọc theo InvoiceId cụ thể
+    //.Include(line => line.Invoice)
+    //.Include(line => line.Service)
+    //.Include(line => line.Material)
+    //.Select(line => new
+    //{
+    //    line.InvoiceId,
+    //    line.LineId,
+    //    ServiceName = line.Service.ServiceName,
+    //    MaterialName = line.Material.MaterialName,
+    //    line.Quantity,
+    //    line.Service.Price,
+    //    line.Material.UnitPrice,
+    //    TotalPay = line.Service.Price + (line.Material.UnitPrice* line.Quantity)
+    //})
+    //.ToList();
+
+
+}
 }
