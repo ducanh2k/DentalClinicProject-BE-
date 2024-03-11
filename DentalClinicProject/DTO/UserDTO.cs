@@ -17,7 +17,17 @@ namespace DentalClinicProject.DTO
         public String? password { get; set; }
         public byte[]? PasswordHash { get; set; }
         public byte[]? PasswordSalt { get; set; }
+
+        public bool IsValidRole()
+        {
+            // Define your valid roles
+            List<int> validRoles = new List<int> { 2, 3, 4 };
+
+            // Check if the role is valid
+            return validRoles.Contains(RoleId.GetValueOrDefault());
+        }
     }
+
 
     public partial class ForeignLanguageDTO
     {
