@@ -30,8 +30,11 @@ namespace DentalClinicProject.DTO
         public string? Comment { get; set; }
         public bool? DeleteFlag { get; set; }
 
-        public virtual Invoice? Invoice { get; set; }
-        public virtual Material? Material { get; set; }
-        public virtual Service? Service { get; set; }
+    }
+
+    public partial class PaymentDTO
+    {
+        public int PaymentId { get; set; }
+        public string? PaymentName { get; set; }
     }
 }

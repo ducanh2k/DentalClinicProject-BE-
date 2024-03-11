@@ -221,8 +221,156 @@ namespace DentalClinicProject.Controllers
         }
 
         //Invoice Details Management
+        //List
+        [HttpGet("InvoiceLines")]
+        public IActionResult GetInvoiceLines(int pageNumber)
+        {
+            
+            List<InvoiceLine> InvoiceLines = _context.InvoiceLines
+                .Include(o => o.Material)
+                .Include(o => o.Service)
+                .Where(x => x.DeleteFlag == false)
+                .ToList();
+            var totalInvoiceLines = InvoiceLines.Count();
+            var totalPages = (int)Math.Ceiling((double)totalInvoiceLines / PageSize);
+            var getPageNumber = pageNumber;
+            if (pageNumber <= 0) getPageNumber += 1;
+            if (pageNumber > totalPages) getPageNumber = totalPages;
+            InvoiceLines = InvoiceLines
+                .Skip((getPageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            
+            //map
+            List<InvoiceLineDTO> results = new List<InvoiceLineDTO>();
+            results = InvoiceLines.Select(_mapper.Map<InvoiceLine, InvoiceLineDTO>).ToList();
+            return Ok(results);
+        }
+        // Create InvoiceLine
+        [HttpPost("InvoiceLines")]
+        public IActionResult AddInvoiceLine(InvoiceLineDTO o)
+        {
+            var InvoiceLine = new InvoiceLine
+            {
+                InvoiceId = o.MaterialId,
+                ServiceId = o.ServiceId,
+                MaterialId = o.MaterialId,
+                Quantity = o.Quantity,
+                Comment = o.Comment,
+                DeleteFlag = false
+            };
+            try
+            {
+                _context.InvoiceLines.Add(InvoiceLine);
+                _context.SaveChanges();
+                return Ok("Thêm mới thành công");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Thêm mới thất bại");
+            }
+        }
+        // Update InvoiceLine
+        [HttpPut("InvoiceLines/{id}")]
+        public ActionResult UpdateInvoiceLine(int id, InvoiceLineDTO InvoiceLineDTO)
+        {
+            var InvoiceLine = _context.InvoiceLines.FirstOrDefault(o => o.LineId == id);
+            if (InvoiceLine == null)
+            {
+                return NotFound();
+            }
+            InvoiceLine.MaterialId = InvoiceLineDTO.MaterialId;
+            InvoiceLine.ServiceId = InvoiceLineDTO.ServiceId;
+            InvoiceLine.MaterialId = InvoiceLineDTO.MaterialId;
+            InvoiceLine.Comment = InvoiceLineDTO.Comment;
+            InvoiceLine.Quantity = InvoiceLineDTO.Quantity;
+            InvoiceLine.DeleteFlag = InvoiceLineDTO.DeleteFlag;
+            _context.SaveChanges();
+            return NoContent();
+        }
+        //Delete InvoiceLine
+        [HttpDelete("InvoiceLines/{id}")]
+        public ActionResult DeleteInvoiceLine(int id)
+        {
+            var InvoiceLine = _context.InvoiceLines.FirstOrDefault(o => o.LineId == id);
+            if (InvoiceLine == null)
+            {
+                return NotFound();
+            }
+            InvoiceLine.DeleteFlag = true;
+            _context.SaveChanges();
+            return NoContent();
+        }
+
 
         //Payment Management
+        //List
+        [HttpGet("Payments")]
+        public IActionResult GetPayments(int pageNumber)
+        {
+            var totalPayments = _context.Payments.Count();
 
+            var totalPages = (int)Math.Ceiling((double)totalPayments / PageSize);
+            var getPageNumber = pageNumber;
+            if (pageNumber <= 0) getPageNumber += 1;
+            if (pageNumber > totalPages) getPageNumber = totalPages;
+            List<Payment> Payments = _context.Payments
+            .Select(o => new Payment { PaymentId = o.PaymentId, PaymentName = o.PaymentName })
+            .Skip((getPageNumber - 1) * PageSize)
+            .Take(PageSize)
+            .ToList();
+
+            if (Payments == null || Payments.Count == 0)
+            {
+                return NotFound("Không có hóa đơn");
+            }
+            
+            return Ok(Payments);
+        }
+        // Create Payment
+        [HttpPost("Payments")]
+        public IActionResult AddPayment(PaymentDTO o)
+        {
+            var Payment = new Payment
+            {
+                PaymentName = o.PaymentName,
+            };
+            try
+            {
+                _context.Payments.Add(Payment);
+                _context.SaveChanges();
+                return Ok("Thêm mới thành công");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Thêm mới thất bại");
+            }
+        }
+        // Update Payment
+        [HttpPut("Payments/{id}")]
+        public ActionResult UpdatePayment(int id, PaymentDTO PaymentDTO)
+        {
+            var Payment = _context.Payments.FirstOrDefault(o => o.PaymentId == id);
+            if (Payment == null)
+            {
+                return NotFound();
+            }
+            Payment.PaymentName = PaymentDTO.PaymentName;
+            _context.SaveChanges();
+            return NoContent();
+        }
+        //Delete Payment
+        [HttpDelete("Payments/{id}")]
+        public ActionResult DeletePayment(int id)
+        {
+            var Payment = _context.Payments.FirstOrDefault(o => o.PaymentId == id);
+            if (Payment == null)
+            {
+                return NotFound();
+            }
+            _context.Payments.Remove(Payment);
+            _context.SaveChanges();
+            return NoContent();
+        }
     }
 }
