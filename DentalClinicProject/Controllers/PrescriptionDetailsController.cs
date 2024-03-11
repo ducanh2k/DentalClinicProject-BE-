@@ -52,19 +52,31 @@ namespace DentalClinicProject.Controllers
         [HttpGet("search")]
         public IActionResult GetPrescriptionsBySearch(string keyword, int pageNumber)
         {
-            var totalPrescriptionDetails = _context.PrescriptionDetails
-                              .Count(s => s.DeleteFlag == false);
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return BadRequest("Từ khóa tìm kiếm không được để trống");
+            }
+
+            List<PrescriptionDetail> prescriptionDetails = _context.PrescriptionDetails
+                .Include(d => d.Medicine)
+                .Where(x =>
+                x.Medicine.Name.Contains(keyword)
+                || x.DosageInstruction.Contains(keyword)
+                && x.DeleteFlag == false)
+                .ToList();
+
+            if (prescriptionDetails == null || prescriptionDetails.Count == 0)
+            {
+                return NotFound("Không có đơn thuốc");
+            }
+
+            var totalPrescriptionDetails = prescriptionDetails.Count();
 
             var totalPages = (int)Math.Ceiling((double)totalPrescriptionDetails / PageSize);
 
             if (pageNumber <= 0) pageNumber = 1;
             if (pageNumber > totalPages) pageNumber = totalPages;
-            List<PrescriptionDetail> prescriptionDetails = _context.PrescriptionDetails
-                .Include(d => d.Medicine)
-                .Where(x => 
-                x.Medicine.Name.Contains(keyword)
-                || x.DosageInstruction.Contains(keyword)
-                && x.DeleteFlag == false)
+            prescriptionDetails = prescriptionDetails
                 .Skip((pageNumber - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();

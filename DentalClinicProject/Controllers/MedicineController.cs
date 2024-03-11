@@ -50,13 +50,6 @@ namespace DentalClinicProject.Controllers
             {
                 return BadRequest("Từ khóa tìm kiếm không được để trống");
             }
-            var totalMeds = _context.Medicines
-                             .Count(s => s.DeleteFlag == false);
-
-            var totalPages = (int)Math.Ceiling((double)totalMeds / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
 
             var medicines = _context.Medicines
                 .Where(s => s.Name.Contains(keyword)
@@ -64,14 +57,24 @@ namespace DentalClinicProject.Controllers
                 || s.Manufacturer.Contains(keyword)
                 || s.Description.Contains(keyword)
                 && s.DeleteFlag == false)
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize)
                 .ToList();
 
             if (medicines == null || medicines.Count == 0)
             {
                 return NotFound("Không có dịch vụ nào phù hợp");
             }
+
+            var totalMeds = medicines.Count();
+
+            var totalPages = (int)Math.Ceiling((double)totalMeds / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+
+            medicines = medicines
+                .Skip((pageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
 
             return Ok(medicines);
         }
