@@ -19,7 +19,7 @@ namespace DentalClinicProject.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        public static User user = new User();
+        public static User user;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
         private readonly dentalContext _context;
@@ -42,6 +42,7 @@ namespace DentalClinicProject.Controllers
             {
                 return BadRequest(new { Error = "Vai trò không đúng đề nghị nhập lại" });
             }
+            user = new User();
 
             user.Email = request.Email;
             user.Role = 1;
