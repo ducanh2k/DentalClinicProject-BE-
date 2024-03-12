@@ -64,18 +64,20 @@ namespace DentalClinicProject.Controllers
             {
                 return BadRequest("Từ khóa tìm kiếm không được để trống");
             }
-            var totalMats = _context.Materials
-                              .Count(s => s.DeleteFlag == false);
+            var Materials = _context.Materials
+               .Where(s => s.MaterialName.Contains(keyword)
+               || s.Supplier.Contains(keyword)
+               && s.DeleteFlag == false
+               )
+               .ToList();
+
+            var totalMats = Materials.Count();
 
             var totalPages = (int)Math.Ceiling((double)totalMats / PageSize);
 
             if (pageNumber <= 0) pageNumber = 1;
             if (pageNumber > totalPages) pageNumber = totalPages;
-            var Materials = _context.Materials
-                .Where(s => s.MaterialName.Contains(keyword) 
-                || s.Supplier.Contains(keyword)
-                && s.DeleteFlag == false
-                )
+            Materials = Materials
                 .Skip((pageNumber - 1) * PageSize)
                 .Take(PageSize).ToList();
 

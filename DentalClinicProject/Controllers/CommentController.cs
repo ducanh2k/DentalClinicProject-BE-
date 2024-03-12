@@ -24,32 +24,50 @@ namespace DentalClinicProject.Controllers
         }
 
         [HttpGet("list")]
-        public IActionResult GetComments(int pageNumber)
+        public IActionResult GetAllComments(int pageNumber, int type) //type: 1= all,2= dental,3= doctor feedback
         {
-            var totalComment = _context.Comments
-                              .Count(s => s.DeleteFlag == false);
+            IQueryable<Comment> query = _context.Comments
+                .Include(a => a.Patient)
+                .Include(a => a.Doctor)
+                .Where(s => s.DeleteFlag == false)
+                .OrderByDescending(a => a.CreatedAt);
 
-            var totalPages = (int)Math.Ceiling((double)totalComment / PageSize);
+            switch (type)
+            {
+                case 2:
+                    query = query.Where(c => c.DoctorId == null);
+                    break;
+                case 3:
+                    query = query.Where(c => c.DoctorId != null);
+                    break;
+                default:
+                    // All comments are included by default, so no filtering needed.
+                    break;
+            }
 
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            var Comments = _context.Comments
-                        .Include(a => a.Patient)
-                        .Where(s => s.DeleteFlag == false)
-                        .OrderByDescending(a => a.CreatedAt)
-                        .Skip((pageNumber - 1) * PageSize)
-                        .Take(PageSize)
-                        .ToList();
+            var Comments = query.ToList();
 
             if (Comments == null || Comments.Count == 0)
             {
                 return NotFound("Không có");
             }
 
+            var totalComment = Comments.Count();
+            var totalPages = (int)Math.Ceiling((double)totalComment / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+
+            Comments = query
+                .Skip((pageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+
             var results = Comments.Select(_mapper.Map<Comment, CommentDTO>).ToList();
 
             return Ok(results);
         }
+
 
         [HttpGet("search")]
         public IActionResult GetCommentsByName(string keyword, int pageNumber)
@@ -70,7 +88,8 @@ namespace DentalClinicProject.Controllers
                         .Include(a => a.Patient)
                         .Where(s =>
                         s.CommentDetail.Contains(keyword) ||
-                        s.Patient.Name.Contains(keyword) 
+                        s.Patient.Name.Contains(keyword) ||
+                        s.Doctor.Name.Contains(keyword)
                         && s.DeleteFlag == false)
                         .OrderByDescending(a => a.CreatedAt)
                         .Skip((pageNumber - 1) * PageSize)
@@ -94,6 +113,7 @@ namespace DentalClinicProject.Controllers
             var ser = _context.Comments
                 .Where(x => x.Id == id)
                 .Include(a => a.Patient)
+                .Include(d => d.Doctor)
                 .FirstOrDefault();
 
             if (ser == null)
@@ -113,6 +133,8 @@ namespace DentalClinicProject.Controllers
             {
                 CommentDetail = CommentDTO.CommentDetail,
                 PatientId = CommentDTO.PatientId,
+                DoctorId = CommentDTO.DoctorId,
+                RatingStar = CommentDTO.RatingStar,
                 CreatedAt = DateTime.Now,
                 DeleteFlag = false,
             };
@@ -141,6 +163,8 @@ namespace DentalClinicProject.Controllers
                 Comment.CommentDetail = CommentDTO.CommentDetail;
                 Comment.PatientId = CommentDTO.PatientId;
                 Comment.DeleteFlag = CommentDTO.DeleteFlag;
+                Comment.DoctorId = CommentDTO.DoctorId;
+                Comment.RatingStar  = CommentDTO.RatingStar;
             }
             catch (Exception ex)
             {

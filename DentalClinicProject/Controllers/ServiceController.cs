@@ -64,28 +64,29 @@ namespace DentalClinicProject.Controllers
             {
                 return BadRequest("Từ khóa tìm kiếm không được để trống");
             }
-            var totalServices = _context.Services
-                              .Count(s => s.DeleteFlag == false);
 
-            var totalPages = (int)Math.Ceiling((double)totalServices / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
             var services = _context.Services
-                .Where(s => s.ServiceName.Contains(keyword) 
+                .Where(s => s.ServiceName.Contains(keyword)
                 || s.BriefInfo.Contains(keyword)
                 || s.Description.Contains(keyword)
                 && s.DeleteFlag == false)
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize)
                 .ToList();
-
-           
 
             if (services == null || services.Count == 0)
             {
                 return NotFound("Không có dịch vụ nào phù hợp");
             }
+
+            var totalServices = services.Count();
+
+            var totalPages = (int)Math.Ceiling((double)totalServices / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+            services = services
+                .Skip((pageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
 
             return Ok(services);
         }

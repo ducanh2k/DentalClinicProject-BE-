@@ -60,13 +60,6 @@ namespace DentalClinicProject.Controllers
                 return BadRequest("Từ khóa tìm kiếm không được để trống");
             }
 
-            var totalNews = _context.News
-                              .Count(s => s.DeleteFlag == false);
-
-            var totalPages = (int)Math.Ceiling((double)totalNews / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
             var News = _context.News
             .Include(a => a.AuthorNavigation)
             .Where(s =>
@@ -77,16 +70,23 @@ namespace DentalClinicProject.Controllers
                 && s.DeleteFlag == false
             )
             .OrderByDescending(a => a.CreatedAt)
-            .Skip((pageNumber - 1) * PageSize)
-            .Take(PageSize)
             .ToList();
-
-
 
             if (News == null || News.Count == 0)
             {
                 return NotFound("Không có dịch vụ");
             }
+
+            var totalNews = News.Count();
+
+            var totalPages = (int)Math.Ceiling((double)totalNews / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+            News = News
+            .Skip((pageNumber - 1) * PageSize)
+            .Take(PageSize)
+            .ToList();
 
             var results = News.Select(_mapper.Map<News, NewsDTO>).ToList();
 

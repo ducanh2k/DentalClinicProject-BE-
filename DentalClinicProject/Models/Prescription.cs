@@ -7,7 +7,6 @@ namespace DentalClinicProject.Models
     {
         public Prescription()
         {
-            Invoices = new HashSet<Invoice>();
             MedicalRecordDetails = new HashSet<MedicalRecordDetail>();
             PrescriptionDetails = new HashSet<PrescriptionDetail>();
         }
@@ -19,7 +18,6 @@ namespace DentalClinicProject.Models
         public string? Note { get; set; }
 
         public virtual User? Doctor { get; set; }
-        public virtual ICollection<Invoice> Invoices { get; set; }
         public virtual ICollection<MedicalRecordDetail> MedicalRecordDetails { get; set; }
         public virtual ICollection<PrescriptionDetail> PrescriptionDetails { get; set; }
     }

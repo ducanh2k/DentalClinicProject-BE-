@@ -32,25 +32,27 @@ namespace DentalClinicProject.Controllers
         [HttpGet("list")]
         public IActionResult GetAppointments(int pageNumber)
         {
-            var totalAppointments = _context.Appointments
-                              .Count(s => s.DeleteFlag == false);
-
-            var totalPages = (int)Math.Ceiling((double)totalAppointments / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
             var appointments = _context.Appointments
                 .Include(u => u.Employee)
                 .Include(u => u.Patient)
                 .Include(u => u.Doctor)
                 .Where(s => s.DeleteFlag == false)
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize)
                 .ToList();
             if (appointments == null || appointments.Count == 0)
             {
                 return NotFound("Không có cuộc hẹn nào");
             }
+            var totalAppointments = appointments.Count();
+
+            var totalPages = (int)Math.Ceiling((double)totalAppointments / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+            appointments = appointments
+                .Skip((pageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            
             List<AppointmentDTO> results = new List<AppointmentDTO>();
             results = appointments.Select(_mapper.Map<Appointment, AppointmentDTO>).ToList();
             return Ok(results);
@@ -84,13 +86,6 @@ namespace DentalClinicProject.Controllers
                 return BadRequest("Từ khóa tìm kiếm không được để trống");
             }
 
-            var totalAppointments = _context.Appointments
-                              .Count(s => s.DeleteFlag == false);
-
-            var totalPages = (int)Math.Ceiling((double)totalAppointments / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
             var appointments = _context.Appointments
                 .Include(u => u.Employee)
                 .Include(u => u.Patient)
@@ -102,13 +97,24 @@ namespace DentalClinicProject.Controllers
                 || s.Note.Contains(keyword)
                 && s.DeleteFlag == false
                 )
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize)
                 .ToList();
             if (appointments == null || appointments.Count == 0)
             {
                 return NotFound("Không có cuộc hẹn nào");
             }
+
+
+            var totalAppointments = appointments.Count();
+
+            var totalPages = (int)Math.Ceiling((double)totalAppointments / PageSize);
+
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageNumber > totalPages) pageNumber = totalPages;
+            appointments = appointments
+                .Skip((pageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            
             List<AppointmentDTO> results = new List<AppointmentDTO>();
             results = appointments.Select(_mapper.Map<Appointment, AppointmentDTO>).ToList();
             return Ok(results);

@@ -52,27 +52,35 @@ namespace DentalClinicProject.Controllers
         [HttpGet("search")]
         public IActionResult GetPrescriptionsBySearch(string keyword, int pageNumber)
         {
-            var totalPrescriptions = _context.Prescriptions
-                              .Count(s => s.DeleteFlag == false);
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return BadRequest("Từ khóa tìm kiếm không được để trống");
+            }
+
+            List<Prescription> prescriptions = _context.Prescriptions
+                .Include(d => d.Doctor)
+                .Where(x =>
+                x.Note.Contains(keyword)
+                && x.PrescriptionId.Equals(keyword)
+                && x.Doctor.Name.Contains(keyword)
+                && x.DeleteFlag == false)
+                .ToList();
+
+            if (prescriptions == null || prescriptions.Count == 0)
+            {
+                return NotFound("Không có đơn thuốc");
+            }
+
+            var totalPrescriptions = prescriptions.Count();
 
             var totalPages = (int)Math.Ceiling((double)totalPrescriptions / PageSize);
 
             if (pageNumber <= 0) pageNumber = 1;
             if (pageNumber > totalPages) pageNumber = totalPages;
-            List<Prescription> prescriptions = _context.Prescriptions
-                .Include(d => d.Doctor)
-                .Where(x => 
-                x.Note.Contains(keyword)
-                && x.PrescriptionId.Equals(keyword)
-                && x.Doctor.Name.Contains(keyword)
-                && x.DeleteFlag == false)
+            prescriptions = prescriptions
                 .Skip((pageNumber - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
-            if (prescriptions == null || prescriptions.Count == 0)
-            {
-                return NotFound("Không có đơn thuốc");
-            }
 
             //map
             List<PrescriptionDTO> results = new List<PrescriptionDTO>();
