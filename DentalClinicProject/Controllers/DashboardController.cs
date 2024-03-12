@@ -94,7 +94,7 @@ namespace DentalClinicProject.Controllers
             {
                 var result = query
                     .Where(a => a.Datetime.Value.Year == year)
-                    .GroupBy(a => new {Year = a.Datetime.Value.Year })
+                    .GroupBy(a => new { Month = a.Datetime.Value.Month, Year = a.Datetime.Value.Year })
                     .Select(g => new
                     {
                         TotalPatientsPerMonth = g.Count(),
@@ -163,4 +163,4 @@ namespace DentalClinicProject.Controllers
         //Chi phi moi trang thiet bi trong 1 thang (12 thang)
 
     }
-}
+

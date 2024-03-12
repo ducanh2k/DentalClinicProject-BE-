@@ -491,29 +491,28 @@ namespace DentalClinicProject.Models
                     .HasColumnType("text")
                     .HasColumnName("description");
 
-                entity.Property(e => e.Email)
-                    .HasMaxLength(50)
-                    .HasColumnName("email");
+                entity.Property(e => e.Email).HasColumnName("email");
 
-                entity.Property(e => e.Img)
-                    .HasMaxLength(50)
-                    .HasColumnName("img");
+                entity.Property(e => e.Img).HasColumnName("img");
 
-                entity.Property(e => e.Name)
-                    .HasMaxLength(50)
-                    .HasColumnName("name");
+                entity.Property(e => e.Name).HasColumnName("name");
 
-                entity.Property(e => e.PasswordHash)
-                     .HasColumnType("varbinary(MAX)")
-                     .HasColumnName("password_hash");
+                entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
 
-                entity.Property(e => e.PasswordSalt)
-                    .HasColumnType("varbinary(MAX)")
-                    .HasColumnName("password_salt");
+                entity.Property(e => e.PasswordSalt).HasColumnName("password_salt");
+
+                entity.Property(e => e.Phone)
+                    .HasMaxLength(11)
+                    .HasColumnName("phone")
+                    .IsFixedLength();
 
                 entity.Property(e => e.RefreshToken)
-                    .HasMaxLength(100) // Adjust the length as needed
+                    .HasMaxLength(255)
                     .HasColumnName("refresh_token");
+
+                entity.Property(e => e.Role).HasColumnName("role");
+
+                entity.Property(e => e.Salary).HasColumnName("salary");
 
                 entity.Property(e => e.TokenCreated)
                     .HasColumnType("datetime")
@@ -522,15 +521,6 @@ namespace DentalClinicProject.Models
                 entity.Property(e => e.TokenExpires)
                     .HasColumnType("datetime")
                     .HasColumnName("token_expires");
-
-                entity.Property(e => e.Phone)
-                    .HasMaxLength(11)
-                    .HasColumnName("phone")
-                    .IsFixedLength();
-
-                entity.Property(e => e.Role).HasColumnName("role");
-
-                entity.Property(e => e.Salary).HasColumnName("salary");
 
                 entity.HasOne(d => d.RoleNavigation)
                     .WithMany(p => p.Users)
