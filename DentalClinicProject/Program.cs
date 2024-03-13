@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 using Newtonsoft.Json.Serialization;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,12 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddAutoMapper(typeof(MyMapperProfile));
 builder.Services.AddDbContext<dentalContext>(
     option => option.UseSqlServer(builder.Configuration.GetConnectionString("MyDB")));
+
+builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        });
 
 builder.Services.AddAuthentication(options =>
 {
