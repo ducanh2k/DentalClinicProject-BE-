@@ -70,7 +70,6 @@ namespace DentalClinicProject.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserDTO request)
         {
-            User user = null;
             user = _context.Users.Include(u => u.RoleNavigation)
                 .FirstOrDefault(o => o.Email == request.Email);
 
@@ -85,8 +84,8 @@ namespace DentalClinicProject.Controllers
             }
 
             string token = CreateToken(user);
-
             var refreshToken = GenerateRefreshToken();
+
             SetRefreshToken(refreshToken);
 
             return Ok(new 
