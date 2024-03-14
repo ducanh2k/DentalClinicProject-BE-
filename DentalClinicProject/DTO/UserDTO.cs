@@ -14,9 +14,21 @@ namespace DentalClinicProject.DTO
         public int? RoleId { get; set; }
         public string? RoleName { get; set; }
         public bool? DeleteFlag { get; set; }
+
+        public bool IsValidRole()
+        {
+            // Define your valid roles
+            List<int> validRoles = new List<int> { 2, 3, 4 };
+
+            // Check if the role is valid
+            return validRoles.Contains(RoleId.GetValueOrDefault());
+        }
+    }
+    public class UserRegisterDTO
+    {
+        public string? Email { get; set; }
+        public int? RoleId { get; set; }
         public String? password { get; set; }
-        public byte[]? PasswordHash { get; set; }
-        public byte[]? PasswordSalt { get; set; }
 
         public bool IsValidRole()
         {
@@ -28,6 +40,12 @@ namespace DentalClinicProject.DTO
         }
     }
 
+    public class UserLoginDTO
+    {
+        public string? Email { get; set; }
+        public String? password { get; set; }
+
+    }
 
     public partial class ForeignLanguageDTO
     {

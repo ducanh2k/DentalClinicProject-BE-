@@ -33,7 +33,7 @@ namespace DentalClinicProject.Controllers
 
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(UserDTO request)
+        public async Task<ActionResult<User>> Register(UserRegisterDTO request)
         {
             CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -48,11 +48,11 @@ namespace DentalClinicProject.Controllers
             user.Role = 1;
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
-            user.Phone = request.Phone;
-            user.Name = request.Name;
-            user.Description = request.Description;
+            //user.Phone = request.Phone;
+            //user.Name = request.Name;
+            //user.Description = request.Description;
             user.Role = request.RoleId;
-            user.Salary = request.Salary;
+            //user.Salary = request.Salary;
             user.DateCreated = DateTime.Now;
             try
             {
@@ -68,7 +68,7 @@ namespace DentalClinicProject.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(UserDTO request)
+        public async Task<ActionResult<string>> Login(UserLoginDTO request)
         {
             user = _context.Users.Include(u => u.RoleNavigation)
                 .FirstOrDefault(o => o.Email == request.Email);
@@ -82,6 +82,7 @@ namespace DentalClinicProject.Controllers
             {
                 return BadRequest("Wrong password.");
             }
+
 
             string token = CreateToken(user);
             var refreshToken = GenerateRefreshToken();

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure.Core;
 using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.ConstrainedExecution;
+using System.Security.Cryptography;
 
 namespace DentalClinicProject.Controllers
 {
@@ -25,8 +27,24 @@ namespace DentalClinicProject.Controllers
             _configuration = configuration;
             PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
         }
+        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
 
-   
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512(passwordSalt))
+            {
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return computedHash.SequenceEqual(passwordHash);
+            }
+        }
+
         //get all 
         [HttpGet("list")]
         public IActionResult GetUsers(int pageNumber)
@@ -143,8 +161,8 @@ namespace DentalClinicProject.Controllers
                 Description = userDTO.Description,
                 Salary = userDTO.Salary,
                 Role = userDTO.RoleId,
-                PasswordHash = userDTO.PasswordHash,
-                PasswordSalt = userDTO.PasswordSalt,
+                //PasswordHash = userDTO.PasswordHash,
+                //PasswordSalt = userDTO.PasswordSalt,
                 DeleteFlag = userDTO.DeleteFlag,
             };
             try
@@ -159,14 +177,17 @@ namespace DentalClinicProject.Controllers
             }
         }
 
+
         [HttpPut("{id}")]
         public ActionResult UpdateUser(int id, UserDTO userDTO)
         {
             var user = _context.Users.FirstOrDefault(o => o.UserId == id);
-            if (User == null)
+            if (user == null)
             {
                 return NotFound();
             }
+
+            try {
                 user.Name = userDTO.Name;
                 user.Phone = userDTO.Phone;
                 user.Email = userDTO.Email;
@@ -175,6 +196,39 @@ namespace DentalClinicProject.Controllers
                 user.Salary = userDTO.Salary;
                 user.Role = userDTO.RoleId;
                 user.DeleteFlag = userDTO.DeleteFlag;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+                
+            _context.SaveChanges();
+            return NoContent();
+        }
+
+        [HttpPut("changePassword/{id}")]
+        public ActionResult ChangeUserPassword(int id, string Oldpassword, string Newpassword)
+        {
+            var user = _context.Users.FirstOrDefault(o => o.UserId == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                if (!VerifyPasswordHash(Oldpassword, user.PasswordHash, user.PasswordSalt))
+                {
+                    return BadRequest("Wrong password.");
+                }
+                CreatePasswordHash(Newpassword, out byte[] passwordHash, out byte[] passwordSalt);
+                user.PasswordHash = passwordHash;
+                user.PasswordSalt = passwordSalt;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
             _context.SaveChanges();
             return NoContent();
         }
