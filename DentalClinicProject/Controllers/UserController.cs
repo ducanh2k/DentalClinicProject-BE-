@@ -250,7 +250,15 @@ namespace DentalClinicProject.Controllers
         [HttpGet("degree")]
         public IActionResult GetDegreesByUserId(int userId)
         {
-            var degrees = _context.Degrees
+            try
+            {
+                var user = _context.Users.FirstOrDefault(x => x.UserId == userId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+
+                var degrees = _context.Degrees
                     .Where(d => d.EmployeeId == userId)
                     .Select(d => new
                     {
@@ -260,60 +268,122 @@ namespace DentalClinicProject.Controllers
                     })
                     .ToList();
 
-            if (degrees == null || degrees.Count == 0)
-            {
-                return NotFound("Không có gi");
+                if (degrees == null || degrees.Count == 0)
+                {
+                    return NotFound("Không có gi");
+                }
+                return Ok(degrees);
             }
-            return Ok(degrees);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("degree/{Id}")]
+        public IActionResult GetDegree(int Id)
+        {
+            try
+            {
+                var degrees = _context.Degrees
+                    .Select(d => new
+                    {
+                        d.Id,
+                        d.EmployeeId,
+                        d.Detail
+                    }).FirstOrDefault(x => x.Id == Id);
+
+                return Ok(degrees);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("degree")]
         public IActionResult AddDegree(DegreeDTO degreeDTO)
         {
             // Chuyển đổi từ DegreeDTO sang Degree nếu cần
-            var degree = new Degree
+            try
             {
-                EmployeeId = degreeDTO.EmployeeId,
-                Detail = degreeDTO.Detail
-            };
+                var degree = new Degree
+                {
+                    EmployeeId = degreeDTO.EmployeeId,
+                    Detail = degreeDTO.Detail
+                };
 
-            _context.Degrees.Add(degree);
-            _context.SaveChanges();
+                var user = _context.Users.FirstOrDefault(x => x.UserId == degree.EmployeeId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
 
-            return Ok("Degree đã được thêm thành công");
+                _context.Degrees.Add(degree);
+                _context.SaveChanges();
+
+                return Ok("Degree đã được thêm thành công");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
+    
+
 
         [HttpPut("degree/{id}")]
         public IActionResult UpdateDegree(int id, DegreeDTO degreeDTO)
         {
-            var degree = _context.Degrees.FirstOrDefault(d => d.Id == id);
-            if (degree == null)
+            try
             {
-                return NotFound("Không tìm thấy degree");
+                var degree = _context.Degrees.FirstOrDefault(d => d.Id == id);
+
+                if (degree == null)
+                {
+                    return NotFound("Không tìm thấy degree");
+                }
+
+                // Cập nhật thông tin degree
+                degree.EmployeeId = degreeDTO.EmployeeId;
+                degree.Detail = degreeDTO.Detail;
+                var user = _context.Users.FirstOrDefault(x => x.UserId == degree.EmployeeId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+                _context.SaveChanges();
+
+                return Ok("Degree đã được cập nhật thành công");
             }
-
-            // Cập nhật thông tin degree
-            degree.EmployeeId = degreeDTO.EmployeeId;
-            degree.Detail = degreeDTO.Detail;
-
-            _context.SaveChanges();
-
-            return Ok("Degree đã được cập nhật thành công");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [HttpDelete("degree/{id}")]
         public IActionResult DeleteDegree(int id)
         {
-            var degree = _context.Degrees.FirstOrDefault(d => d.Id == id);
-            if (degree == null)
+            try
             {
-                return NotFound("Không tìm thấy degree");
+                var degree = _context.Degrees.FirstOrDefault(d => d.Id == id);
+                if (degree == null)
+                {
+                    return NotFound("Không tìm thấy degree");
+                }
+
+                _context.Degrees.Remove(degree);
+                _context.SaveChanges();
+
+                return Ok("Degree đã được xóa thành công");
             }
-
-            _context.Degrees.Remove(degree);
-            _context.SaveChanges();
-
-            return Ok("Degree đã được xóa thành công");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
 
@@ -321,132 +391,285 @@ namespace DentalClinicProject.Controllers
         [HttpGet("AreasOfExpertise")]
         public IActionResult GetAreasOfExpertisesByUserId(int userId)
         {
-            var user = _context.Users.FirstOrDefault(r => r.UserId == userId);
-
-            var AreasOfExpertises = _context.AreasOfExpertises
-                    .Where(d => d.EmployeeId == userId)
-                    .Select(d => new
-                    {
-                        d.Id,
-                        d.EmployeeId,
-                        d.Detail
-                    })
-                    .ToList();
-
-            if (AreasOfExpertises == null || AreasOfExpertises.Count == 0)
+            try
             {
-                return NotFound("Không có gi");
+                var user = _context.Users.FirstOrDefault(r => r.UserId == userId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+                var AreasOfExpertises = _context.AreasOfExpertises
+                        .Where(d => d.EmployeeId == userId)
+                        .Select(d => new
+                        {
+                            d.Id,
+                            d.EmployeeId,
+                            d.Detail
+                        })
+                        .ToList();
+
+                if (AreasOfExpertises == null || AreasOfExpertises.Count == 0)
+                {
+                    return NotFound("Không có gi");
+                }
+                return Ok(AreasOfExpertises);
             }
-            return Ok(AreasOfExpertises);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
+        }
+
+        [HttpGet("AreasOfExpertise/{Id}")]
+        public IActionResult GetAreasOfExpertise(int Id)
+        {
+            try
+            {
+                
+                var AreasOfExpertises = _context.AreasOfExpertises
+                        .Select(d => new
+                        {
+                            d.Id,
+                            d.EmployeeId,
+                            d.Detail
+                        })
+                        .FirstOrDefault(d => d.Id == Id);
+
+                var user = _context.Users.FirstOrDefault(r => r.UserId == AreasOfExpertises.EmployeeId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+
+                if (AreasOfExpertises == null)
+                {
+                    return NotFound("Không có gi");
+                }
+                return Ok(AreasOfExpertises);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPost("AreasOfExpertise")]
         public IActionResult AddAreaOfExpertise(AreasOfExpertiseDTO areaOfExpertiseDTO)
         {
-            var areaOfExpertise = new AreasOfExpertise
+            try
             {
-                EmployeeId = areaOfExpertiseDTO.EmployeeId,
-                Detail = areaOfExpertiseDTO.Detail
-            };
+                var areaOfExpertise = new AreasOfExpertise
+                {
+                    EmployeeId = areaOfExpertiseDTO.EmployeeId,
+                    Detail = areaOfExpertiseDTO.Detail
+                };
+                var user = _context.Users.FirstOrDefault(r => r.UserId == areaOfExpertise.EmployeeId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+                _context.AreasOfExpertises.Add(areaOfExpertise);
+                _context.SaveChanges();
 
-            _context.AreasOfExpertises.Add(areaOfExpertise);
-            _context.SaveChanges();
-
-            return Ok("Kỹ năng chuyên môn đã được thêm thành công");
+                return Ok("Kỹ năng chuyên môn đã được thêm thành công");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("AreasOfExpertise/{id}")]
         public IActionResult UpdateAreaOfExpertise(int id, AreasOfExpertiseDTO updatedAreaOfExpertiseDTO)
         {
-            var areaOfExpertise = _context.AreasOfExpertises.FirstOrDefault(a => a.Id == id);
-            if (areaOfExpertise == null)
+            try
             {
-                return NotFound("Không tìm thấy kỹ năng chuyên môn");
+                var areaOfExpertise = _context.AreasOfExpertises.FirstOrDefault(a => a.Id == id);
+                if (areaOfExpertise == null)
+                {
+                    return NotFound("Không tìm thấy kỹ năng chuyên môn");
+                }
+
+                // Cập nhật thông tin kỹ năng chuyên môn
+                areaOfExpertise.EmployeeId = updatedAreaOfExpertiseDTO.EmployeeId;
+                areaOfExpertise.Detail = updatedAreaOfExpertiseDTO.Detail;
+                var user = _context.Users.FirstOrDefault(r => r.UserId == areaOfExpertise.EmployeeId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+                _context.SaveChanges();
+
+                return Ok("Kỹ năng chuyên môn đã được cập nhật thành công");
             }
-
-            // Cập nhật thông tin kỹ năng chuyên môn
-            areaOfExpertise.EmployeeId = updatedAreaOfExpertiseDTO.EmployeeId;
-            areaOfExpertise.Detail = updatedAreaOfExpertiseDTO.Detail;
-
-            _context.SaveChanges();
-
-            return Ok("Kỹ năng chuyên môn đã được cập nhật thành công");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("AreasOfExpertise/{id}")]
         public IActionResult DeleteAreaOfExpertise(int id)
         {
-            var areaOfExpertise = _context.AreasOfExpertises.FirstOrDefault(a => a.Id == id);
-            if (areaOfExpertise == null)
+            try
             {
-                return NotFound("Không tìm thấy kỹ năng chuyên môn");
+                var areaOfExpertise = _context.AreasOfExpertises.FirstOrDefault(a => a.Id == id);
+                if (areaOfExpertise == null)
+                {
+                    return NotFound("Không tìm thấy kỹ năng chuyên môn");
+                }
+
+                _context.AreasOfExpertises.Remove(areaOfExpertise);
+                _context.SaveChanges();
+
+                return Ok("Kỹ năng chuyên môn đã được xóa thành công");
             }
-
-            _context.AreasOfExpertises.Remove(areaOfExpertise);
-            _context.SaveChanges();
-
-            return Ok("Kỹ năng chuyên môn đã được xóa thành công");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
         [HttpGet("ForeignLanguages")]
         public IActionResult GetForeignLanguagesByUserId(int userId)
         {
-            var user = _context.Users.FirstOrDefault(r => r.UserId == userId);
-
-            var ForeignLanguages = _context.ForeignLanguages
-                    .Where(d => d.EmployeeId == userId)
-                    .Select(d => new
-                    {
-                        d.Id,
-                        d.EmployeeId,
-                        d.Detail
-                    })
-                    .ToList();
-
-            if (ForeignLanguages == null || ForeignLanguages.Count == 0)
+            try
             {
-                return NotFound("Không có gi");
+                var user = _context.Users.FirstOrDefault(r => r.UserId == userId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+                var ForeignLanguages = _context.ForeignLanguages
+                        .Where(d => d.EmployeeId == userId)
+                        .Select(d => new
+                        {
+                            d.Id,
+                            d.EmployeeId,
+                            d.Detail
+                        })
+                        .ToList();
+
+                if (ForeignLanguages == null || ForeignLanguages.Count == 0)
+                {
+                    return NotFound("Không có gi");
+                }
+                return Ok(ForeignLanguages);
             }
-            return Ok(ForeignLanguages);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            
+        }
+
+        [HttpGet("ForeignLanguages/{Id}")]
+        public IActionResult GetForeignLanguage(int Id)
+        {
+            try
+            {
+                
+                var ForeignLanguages = _context.ForeignLanguages
+                        .Select(d => new
+                        {
+                            d.Id,
+                            d.EmployeeId,
+                            d.Detail
+                        })
+                        .FirstOrDefault(d => d.Id == Id);
+                var user = _context.Users.FirstOrDefault(r => r.UserId == ForeignLanguages.EmployeeId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+                if (ForeignLanguages == null)
+                {
+                    return NotFound("Không có gi");
+                }
+                return Ok(ForeignLanguages);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+
         }
 
         [HttpPost("ForeignLanguages")]
         public IActionResult AddForeignLanguage(ForeignLanguageDTO foreignLanguageDTO)
         {
-            var foreignLanguage = new ForeignLanguage
+            try
             {
-                EmployeeId = foreignLanguageDTO.EmployeeId,
-                Detail = foreignLanguageDTO.Detail
-            };
+                var foreignLanguage = new ForeignLanguage
+                {
+                    EmployeeId = foreignLanguageDTO.EmployeeId,
+                    Detail = foreignLanguageDTO.Detail
+                };
+                var user = _context.Users.FirstOrDefault(r => r.UserId == foreignLanguage.EmployeeId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+                _context.ForeignLanguages.Add(foreignLanguage);
+                _context.SaveChanges();
 
-            _context.ForeignLanguages.Add(foreignLanguage);
-            _context.SaveChanges();
-
-            return Ok("Ngoại ngữ đã được thêm thành công");
+                return Ok("Ngoại ngữ đã được thêm thành công");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [HttpPut("ForeignLanguages/{id}")]
         public IActionResult UpdateForeignLanguage(int id, ForeignLanguageDTO updatedForeignLanguageDTO)
         {
-            var foreignLanguage = _context.ForeignLanguages.FirstOrDefault(f => f.Id == id);
-            if (foreignLanguage == null)
+            try
             {
-                return NotFound("Không tìm thấy ngoại ngữ");
+                var foreignLanguage = _context.ForeignLanguages.FirstOrDefault(f => f.Id == id);
+                if (foreignLanguage == null)
+                {
+                    return NotFound("Không tìm thấy ngoại ngữ");
+                }
+
+                // Cập nhật thông tin ngoại ngữ
+                foreignLanguage.EmployeeId = updatedForeignLanguageDTO.EmployeeId;
+                foreignLanguage.Detail = updatedForeignLanguageDTO.Detail;
+                var user = _context.Users.FirstOrDefault(r => r.UserId == foreignLanguage.EmployeeId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+                _context.SaveChanges();
+
+                return Ok("Ngoại ngữ đã được cập nhật thành công");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            // Cập nhật thông tin ngoại ngữ
-            foreignLanguage.EmployeeId = updatedForeignLanguageDTO.EmployeeId;
-            foreignLanguage.Detail = updatedForeignLanguageDTO.Detail;
-
-            _context.SaveChanges();
-
-            return Ok("Ngoại ngữ đã được cập nhật thành công");
+            
         }
 
         [HttpDelete("ForeignLanguages/{id}")]
         public IActionResult DeleteForeignLanguage(int id)
         {
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
             var foreignLanguage = _context.ForeignLanguages.FirstOrDefault(f => f.Id == id);
             if (foreignLanguage == null)
             {
@@ -463,71 +686,148 @@ namespace DentalClinicProject.Controllers
         [HttpGet("ParticipatingTrainingCourse")]
         public IActionResult GetParticipatingTrainingCoursesByUserId(int userId)
         {
-            var user = _context.Users.FirstOrDefault(r => r.UserId == userId);
-
-            var ParticipatingTrainingCourses = _context.ParticipatingTrainingCourses
-                    .Where(d => d.EmployeeId == userId)
-                    .Select(d => new
-                    {
-                        d.Id,
-                        d.EmployeeId,
-                        d.Detail
-                    })
-                    .ToList();
-
-            if (ParticipatingTrainingCourses == null || ParticipatingTrainingCourses.Count == 0)
+            try
             {
-                return NotFound("Không có gi");
+                var user = _context.Users.FirstOrDefault(r => r.UserId == userId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+
+                var ParticipatingTrainingCourses = _context.ParticipatingTrainingCourses
+                        .Where(d => d.EmployeeId == userId)
+                        .Select(d => new
+                        {
+                            d.Id,
+                            d.EmployeeId,
+                            d.Detail
+                        })
+                        .ToList();
+
+                if (ParticipatingTrainingCourses == null || ParticipatingTrainingCourses.Count == 0)
+                {
+                    return NotFound("Không có gi");
+                }
+                return Ok(ParticipatingTrainingCourses);
             }
-            return Ok(ParticipatingTrainingCourses);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
+        }
+
+        [HttpGet("ParticipatingTrainingCourse/{Id}")]
+        public IActionResult GetParticipatingTrainingCourse(int Id)
+        {
+            try
+            {
+                
+
+                var ParticipatingTrainingCourses = _context.ParticipatingTrainingCourses
+                        .Select(d => new
+                        {
+                            d.Id,
+                            d.EmployeeId,
+                            d.Detail
+                        })
+                        .FirstOrDefault(d => d.Id == Id);
+                var user = _context.Users.FirstOrDefault(r => r.UserId == ParticipatingTrainingCourses.EmployeeId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+                if (ParticipatingTrainingCourses == null)
+                {
+                    return NotFound("Không có gi");
+                }
+                return Ok(ParticipatingTrainingCourses);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPost("ParticipatingTrainingCourses")]
         public IActionResult AddParticipatingTrainingCourse(ParticipatingTrainingCourseDTO participatingTrainingCourseDTO)
         {
-            var participatingTrainingCourse = new ParticipatingTrainingCourse
+            try
             {
-                EmployeeId = participatingTrainingCourseDTO.EmployeeId,
-                Detail = participatingTrainingCourseDTO.Detail
-            };
+                var participatingTrainingCourse = new ParticipatingTrainingCourse
+                {
+                    EmployeeId = participatingTrainingCourseDTO.EmployeeId,
+                    Detail = participatingTrainingCourseDTO.Detail
+                };
+                var user = _context.Users.FirstOrDefault(r => r.UserId == participatingTrainingCourse.EmployeeId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+                _context.ParticipatingTrainingCourses.Add(participatingTrainingCourse);
+                _context.SaveChanges();
 
-            _context.ParticipatingTrainingCourses.Add(participatingTrainingCourse);
-            _context.SaveChanges();
-
-            return Ok("Khóa đào tạo đã được thêm thành công");
+                return Ok("Khóa đào tạo đã được thêm thành công");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [HttpPut("ParticipatingTrainingCourses/{id}")]
         public IActionResult UpdateParticipatingTrainingCourse(int id, ParticipatingTrainingCourseDTO updatedParticipatingTrainingCourseDTO)
         {
-            var participatingTrainingCourse = _context.ParticipatingTrainingCourses.FirstOrDefault(p => p.Id == id);
-            if (participatingTrainingCourse == null)
+            try
             {
-                return NotFound("Không tìm thấy khóa đào tạo");
+                var participatingTrainingCourse = _context.ParticipatingTrainingCourses.FirstOrDefault(p => p.Id == id);
+                if (participatingTrainingCourse == null)
+                {
+                    return NotFound("Không tìm thấy khóa đào tạo");
+                }
+                var user = _context.Users.FirstOrDefault(r => r.UserId == participatingTrainingCourse.EmployeeId);
+                if (user.Role != 3)
+                {
+                    return BadRequest("Người dùng không phải là bác sĩ");
+                }
+                // Cập nhật thông tin khóa đào tạo
+                participatingTrainingCourse.EmployeeId = updatedParticipatingTrainingCourseDTO.EmployeeId;
+                participatingTrainingCourse.Detail = updatedParticipatingTrainingCourseDTO.Detail;
+
+                _context.SaveChanges();
+
+                return Ok("Khóa đào tạo đã được cập nhật thành công");
             }
-
-            // Cập nhật thông tin khóa đào tạo
-            participatingTrainingCourse.EmployeeId = updatedParticipatingTrainingCourseDTO.EmployeeId;
-            participatingTrainingCourse.Detail = updatedParticipatingTrainingCourseDTO.Detail;
-
-            _context.SaveChanges();
-
-            return Ok("Khóa đào tạo đã được cập nhật thành công");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [HttpDelete("ParticipatingTrainingCourses/{id}")]
         public IActionResult DeleteParticipatingTrainingCourse(int id)
         {
-            var participatingTrainingCourse = _context.ParticipatingTrainingCourses.FirstOrDefault(p => p.Id == id);
-            if (participatingTrainingCourse == null)
+            try
             {
-                return NotFound("Không tìm thấy khóa đào tạo");
+                var participatingTrainingCourse = _context.ParticipatingTrainingCourses.FirstOrDefault(p => p.Id == id);
+                if (participatingTrainingCourse == null)
+                {
+                    return NotFound("Không tìm thấy khóa đào tạo");
+                }
+
+                _context.ParticipatingTrainingCourses.Remove(participatingTrainingCourse);
+                _context.SaveChanges();
+
+                return Ok("Khóa đào tạo đã được xóa thành công");
             }
-
-            _context.ParticipatingTrainingCourses.Remove(participatingTrainingCourse);
-            _context.SaveChanges();
-
-            return Ok("Khóa đào tạo đã được xóa thành công");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
 
