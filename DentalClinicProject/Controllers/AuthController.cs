@@ -35,7 +35,6 @@ namespace DentalClinicProject.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register(UserRegisterDTO request)
         {
-            CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
 
 
             if (!request.IsValidRole())
@@ -45,15 +44,15 @@ namespace DentalClinicProject.Controllers
             user = new User();
 
             user.Email = request.Email;
-            user.Role = 1;
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
             //user.Phone = request.Phone;
             //user.Name = request.Name;
             //user.Description = request.Description;
             user.Role = request.RoleId;
             //user.Salary = request.Salary;
             user.DateCreated = DateTime.Now;
+
+            user.CreatePasswordHash(request.password);
+            
             try
             {
                 _context.Users.Add(user);
@@ -78,7 +77,7 @@ namespace DentalClinicProject.Controllers
                 return BadRequest(user);
             }
 
-            if (!VerifyPasswordHash(request.password, user.PasswordHash, user.PasswordSalt))
+            if (!user.VerifyPasswordHash(request.password))
             {
                 return BadRequest("Wrong password.");
             }
@@ -169,23 +168,7 @@ namespace DentalClinicProject.Controllers
             return jwt;
         }
 
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        {
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
-        }
-
-        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
-        {
-            using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return computedHash.SequenceEqual(passwordHash);
-            }
-        }
+        
 
     }
 }
