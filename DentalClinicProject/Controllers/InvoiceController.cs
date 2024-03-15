@@ -414,7 +414,6 @@ namespace DentalClinicProject.Controllers
             try
             {
                 InvoiceLine.ServiceId = InvoiceLineDTO.ServiceId;
-                InvoiceLine.MaterialId = InvoiceLineDTO.MaterialId;
                 InvoiceLine.Comment = InvoiceLineDTO.Comment;
                 InvoiceLine.Quantity = InvoiceLineDTO.Quantity;
                 InvoiceLine.DeleteFlag = InvoiceLineDTO.DeleteFlag;
