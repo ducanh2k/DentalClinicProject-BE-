@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace DentalClinicProject.Models
 {
@@ -54,5 +55,24 @@ namespace DentalClinicProject.Models
         public virtual ICollection<News> News { get; set; }
         public virtual ICollection<ParticipatingTrainingCourse> ParticipatingTrainingCourses { get; set; }
         public virtual ICollection<Prescription> Prescriptions { get; set; }
+
+        internal void CreatePasswordHash(string password)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                PasswordSalt = hmac.Key;
+                PasswordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
+
+        internal bool VerifyPasswordHash(string password)
+        {
+            using (var hmac = new HMACSHA512(PasswordSalt))
+            {
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return PasswordHash != null && computedHash != null && PasswordHash.Length == computedHash.Length && PasswordHash.AsSpan().SequenceEqual(computedHash);
+            }
+        }
+
     }
 }

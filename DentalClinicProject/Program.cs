@@ -1,9 +1,11 @@
+using Azure.Core;
 using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
 using DentalClinicProject.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -81,4 +83,49 @@ app.UseCors(x => x
            .AllowAnyHeader()
            .AllowCredentials()
            .SetIsOriginAllowed(origin => true));
+
+ static void InsertAdmin(IServiceProvider services, WebApplicationBuilder? builder)
+{
+    using var scope = services.CreateScope();
+    var serviceProvider = scope.ServiceProvider;
+
+    try
+    {
+        var context = serviceProvider.GetRequiredService<dentalContext>();
+
+
+        var admin = new User();
+        var email = builder.Configuration["Admin:Email"];
+        var pass = builder.Configuration["Admin:Password"];
+
+        admin = context.Users.Include(u => u.RoleNavigation)
+                .FirstOrDefault(o => o.Email == email);
+
+        if (admin == null || admin.Email != email)
+        {
+
+            admin = new User
+            {
+                Email = email,
+                Name = "dental",
+                Role = 1
+            };
+
+            admin.CreatePasswordHash(pass);
+
+            context.Users.Add(admin);
+            context.SaveChanges();
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while inserting admin into the database.");
+    }
+}
+
+InsertAdmin(app.Services, builder);
+
+
+
 app.Run();
