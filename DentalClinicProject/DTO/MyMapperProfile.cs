@@ -40,8 +40,14 @@ namespace DentalClinicProject.DTO
                 .ForMember(dest => dest.StaffName, opt => opt.MapFrom(source => source.Staff.Name))
                 .ForMember(dest => dest.PaymentType, opt => opt.MapFrom(source => source.Payment.PaymentName))
                 ;
+            CreateMap<Invoice, InvoiceImportDTO>()
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(source => source.Customer.Name))
+                .ForMember(dest => dest.PaymentType, opt => opt.MapFrom(source => source.Payment.PaymentName))
+                ;
             CreateMap<InvoiceLine, InvoiceLineDTO>()
                 .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(source => source.Service.ServiceName))
+                ;
+            CreateMap<InvoiceLine, InvoiceLineImportDTO>()
                 .ForMember(dest => dest.MaterialName, opt => opt.MapFrom(source => source.Material.MaterialName))
                 ;
         }
