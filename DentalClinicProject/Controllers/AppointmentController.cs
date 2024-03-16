@@ -207,6 +207,11 @@ namespace DentalClinicProject.Controllers
             appointment.Status = appointmentDTO.Status;
             appointment.DeleteFlag = appointmentDTO.DeleteFlag;
             _context.SaveChanges();
+
+            if(appointment.Status == "Done")
+            {
+
+            }
             return NoContent();
         }
 
