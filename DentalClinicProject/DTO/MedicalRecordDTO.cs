@@ -16,6 +16,7 @@
         public int? ServiceId { get; set; }
         public string? ServiceName { get; set; }
         public int? PrescriptionId { get; set; }
+        public string? PrescriptionNote { get; set; }
         public string? Diagnosis { get; set; }
         public bool? DeleteFlag { get; set; }
     }

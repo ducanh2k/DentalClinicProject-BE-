@@ -81,6 +81,7 @@ namespace DentalClinicProject.Controllers
                         ServiceName = o.Service.ServiceName,
                         o.PrescriptionId,
                         o.Diagnosis,
+                        PrescriptionNote = o.Prescription.Note,
                         Appointments = o.Appointments.Select(appointment => new
                         {
                             appointment.AppointmentId
