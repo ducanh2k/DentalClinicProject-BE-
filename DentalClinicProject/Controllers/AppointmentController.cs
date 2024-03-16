@@ -36,6 +36,10 @@ namespace DentalClinicProject.Controllers
                 .Include(u => u.Employee)
                 .Include(u => u.Patient)
                 .Include(u => u.Doctor)
+                .Include(u => u.MedicalRecordDetail)
+                    .ThenInclude(u => u.Service)
+                .Include(u => u.MedicalRecordDetail)
+                    .ThenInclude(u => u.Prescription)
                 .Where(s => s.DeleteFlag == false)
                 .ToList();
             if (appointments == null || appointments.Count == 0)
@@ -56,6 +60,46 @@ namespace DentalClinicProject.Controllers
             List<AppointmentDTO> results = new List<AppointmentDTO>();
             results = appointments.Select(_mapper.Map<Appointment, AppointmentDTO>).ToList();
             return Ok(results);
+        }
+
+        [HttpGet("list/userId")]
+        public IActionResult GetAppointmentsByUser(int pageNumber,int userId)
+        {
+            try
+            {
+                var appointments = _context.Appointments
+                .Include(u => u.Employee)
+                .Include(u => u.Patient)
+                .Include(u => u.Doctor)
+                .Include(u => u.MedicalRecordDetail) 
+                    .ThenInclude(u => u.Service)
+                .Include(u => u.MedicalRecordDetail)
+                    .ThenInclude(u => u.Prescription)
+                .Where(s => s.DeleteFlag == false && s.PatientId == userId)
+                .ToList();
+                if (appointments == null || appointments.Count == 0)
+                {
+                    return NotFound("Không có cuộc hẹn nào");
+                }
+                var totalAppointments = appointments.Count();
+
+                var totalPages = (int)Math.Ceiling((double)totalAppointments / PageSize);
+
+                if (pageNumber <= 0) pageNumber = 1;
+                if (pageNumber > totalPages) pageNumber = totalPages;
+                appointments = appointments
+                    .Skip((pageNumber - 1) * PageSize)
+                    .Take(PageSize)
+                    .ToList();
+
+                List<AppointmentDTO> results = new List<AppointmentDTO>();
+                results = appointments.Select(_mapper.Map<Appointment, AppointmentDTO>).ToList();
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
