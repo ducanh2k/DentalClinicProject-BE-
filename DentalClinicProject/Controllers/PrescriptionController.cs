@@ -91,30 +91,39 @@ namespace DentalClinicProject.Controllers
         [HttpGet("{id}")]
         public IActionResult GetPrescription(int id)
         {
-            
-            var prescriptions = _context.Prescriptions
-                .Include(d => d.Doctor)
-                .Where(x => x.PrescriptionId == id)
-                .Select(p => new
-                {
-                    PrescriptionDetail = p.PrescriptionDetails.Select(pd => new
-                    {
-                        pd.PrescriptionDetailId,
-                        pd.PrescriptionId,
-                        pd.MedicineId,
-                        MedicineName = pd.Medicine.Name,
-                        pd.Quantity,
-                        pd.DosageInstruction,
-                        pd.DeleteFlag
-                    })
-                })
-                ;
-            if (prescriptions == null )
+            try
             {
-                return NotFound("Không có đơn thuốc");
-            }
+                var prescription = _context.Prescriptions
+                .Include(p => p.PrescriptionDetails)
+                    .ThenInclude(pd => pd.Medicine)
+                .FirstOrDefault(x => x.PrescriptionId == id);
 
-            return Ok(prescriptions);
+                if (prescription == null)
+                {
+                    return NotFound("Không có đơn thuốc");
+                }
+
+                var medicines = prescription.PrescriptionDetails
+                    .Select(pd => new
+                    {
+                        pd.Medicine.Name,
+                        pd.Quantity,
+                        pd.Medicine.Dosage
+                    })
+                    .ToList();
+
+                var result = new
+                {
+                    Medicines = medicines,
+                    DoctorNote = prescription.Note
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
         }
 
         [HttpPost]
