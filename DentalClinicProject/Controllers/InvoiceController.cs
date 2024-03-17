@@ -363,7 +363,6 @@ namespace DentalClinicProject.Controllers
             {
                 InvoiceId = o.InvoiceId,
                 ServiceId = o.ServiceId,
-                Quantity = o.Quantity,
                 Comment = o.Comment,
                 DeleteFlag = false
             };
@@ -415,7 +414,6 @@ namespace DentalClinicProject.Controllers
             {
                 InvoiceLine.ServiceId = InvoiceLineDTO.ServiceId;
                 InvoiceLine.Comment = InvoiceLineDTO.Comment;
-                InvoiceLine.Quantity = InvoiceLineDTO.Quantity;
                 InvoiceLine.DeleteFlag = InvoiceLineDTO.DeleteFlag;
                 _context.SaveChanges();
             }

@@ -151,25 +151,42 @@ namespace DentalClinicProject.Controllers
         [HttpPost]
         public IActionResult AddUser(UserDTO userDTO)
         {
-            var user = new User
-            {
-                Name = userDTO.Name,
-                DateCreated = DateTime.Now,
-                Phone = userDTO.Phone,
-                Email = userDTO.Email,
-                Img = userDTO.Img,
-                Description = userDTO.Description,
-                Salary = userDTO.Salary,
-                Role = userDTO.RoleId,
-                //PasswordHash = userDTO.PasswordHash,
-                //PasswordSalt = userDTO.PasswordSalt,
-                DeleteFlag = userDTO.DeleteFlag,
-            };
             try
             {
+                var user = new User
+                {
+                    Name = userDTO.Name,
+                    DateCreated = DateTime.Now,
+                    Phone = userDTO.Phone,
+                    Email = userDTO.Email,
+                    Img = userDTO.Img,
+                    Description = userDTO.Description,
+                    Salary = userDTO.Salary,
+                    Role = userDTO.RoleId,
+                    //PasswordHash = userDTO.PasswordHash,
+                    //PasswordSalt = userDTO.PasswordSalt,
+                    DeleteFlag = false
+                };
                 _context.Users.Add(user);
                 _context.SaveChanges();
-                return Ok("Thêm mới thành công");
+
+                try
+                {
+                    // add medical record when create account
+                    var record = new MedicalRecord
+                    {
+                        PatientId = user.UserId,
+                        DeleteFlag = false
+                    };
+                    _context.MedicalRecords.Add(record);
+                    _context.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest("Thêm mới hồ sơ thất bại");
+                }
+
+                return Ok("Thêm mới người dùng thành công");
             }
             catch (Exception ex)
             {

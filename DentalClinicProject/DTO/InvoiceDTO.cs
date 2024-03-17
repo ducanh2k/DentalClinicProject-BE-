@@ -51,7 +51,6 @@ namespace DentalClinicProject.DTO
         public int? InvoiceId { get; set; }
         public int? ServiceId { get; set; }
         public string? ServiceName { get; set; }
-        public int? Quantity { get; set; }
         public string? Comment { get; set; }
         public bool? DeleteFlag { get; set; }
 
