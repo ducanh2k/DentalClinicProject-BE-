@@ -92,19 +92,60 @@ namespace DentalClinicProject.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateMedicalRecordDetails(int id, MedicalRecordDetailDTO MedicalRecordDetailDTO)
+        public ActionResult UpdateMedicalRecordDetails(int id, MedicalRecordDetailDTO MedicalRecordDetailDTO, bool type) //true kham moi, tai kham
         {
-            var MedicalRecordDetail = _context.MedicalRecordDetails.FirstOrDefault(o => o.MrDetailId == id);
-            if (MedicalRecordDetail == null)
+            try
             {
-                return NotFound();
+                var MedicalRecordDetail = _context.MedicalRecordDetails.Include(m => m.MedicalRecord).FirstOrDefault(o => o.MrDetailId == id);
+                if (MedicalRecordDetail == null)
+                {
+                    return NotFound();
+                }
+                MedicalRecordDetail.MedicalRecordId = MedicalRecordDetailDTO.MedicalRecordId;
+                MedicalRecordDetail.ServiceId = MedicalRecordDetailDTO.ServiceId;
+                MedicalRecordDetail.PrescriptionId = MedicalRecordDetailDTO.PrescriptionId;
+                MedicalRecordDetail.Diagnosis = MedicalRecordDetailDTO.Diagnosis;
+                MedicalRecordDetail.DeleteFlag = MedicalRecordDetailDTO.DeleteFlag;
+                _context.SaveChanges();
+                // Create invoice
+                
+                try
+                {
+                    var Invoice = new Invoice
+                    {
+                        CustomerId = MedicalRecordDetail.MedicalRecord.PatientId,
+                        Date = DateTime.Now,
+                        Status = 1,
+                        DeleteFlag = false
+                    };
+                    _context.Invoices.Add(Invoice);
+                    _context.SaveChanges();
+
+                    try
+                    {
+                        var line = new InvoiceLine
+                        {
+                            InvoiceId = Invoice.InvoiceId,
+                            ServiceId = MedicalRecordDetailDTO.ServiceId,
+                            DeleteFlag = false
+                        };
+                        _context.InvoiceLines.Add(line);
+                        _context.SaveChanges();
+                    }
+                    catch (Exception ex)
+                    {
+                        return BadRequest("Thêm mới dòng hóa đơn thất bại");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest("Thêm mới hóa đơn thất bại");
+                }
             }
-            MedicalRecordDetail.MedicalRecordId = MedicalRecordDetailDTO.MedicalRecordId;
-            MedicalRecordDetail.ServiceId = MedicalRecordDetailDTO.ServiceId;
-            MedicalRecordDetail.PrescriptionId = MedicalRecordDetailDTO.PrescriptionId;
-            MedicalRecordDetail.Diagnosis = MedicalRecordDetailDTO.Diagnosis;
-            MedicalRecordDetail.DeleteFlag = MedicalRecordDetailDTO.DeleteFlag;
-            _context.SaveChanges();
+            catch (Exception ex)
+            {
+                return BadRequest("Thêm mới hồ sơ thất bại" + ex.Message);
+            }
             return NoContent();
         }
 

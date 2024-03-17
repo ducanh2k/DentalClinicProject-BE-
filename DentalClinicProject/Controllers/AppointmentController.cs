@@ -27,7 +27,6 @@ namespace DentalClinicProject.Controllers
             _configuration = configuration;
             PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
         }
-
         
         [HttpGet("list")]
         public IActionResult GetAppointments(int pageNumber)
@@ -165,7 +164,7 @@ namespace DentalClinicProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddAppointment(AppointmentDTO appointmentDTO)
+        public IActionResult AddAppointment(AddAppointmentDTO appointmentDTO)
         {
             var appointment = new Appointment
             {
@@ -175,10 +174,9 @@ namespace DentalClinicProject.Controllers
                 DoctorId = appointmentDTO.DoctorId,
                 Datetime = DateTime.Now,
                 Note = appointmentDTO.Note,
-                Status = "1",
+                Status = "Pending",
                 DeleteFlag = false
             };
-
             try
             {
                 _context.Appointments.Add(appointment);
@@ -192,27 +190,57 @@ namespace DentalClinicProject.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateAppointment(int id, AppointmentDTO appointmentDTO)
+        public ActionResult UpdateAppointment(int id, UpdateAppointmentDTO appointmentDTO) 
         {
-            var appointment = _context.Appointments.FirstOrDefault(a => a.AppointmentId == id);
-            if (appointment == null)
+           
+            try
             {
-                return NotFound();
-            }
-            appointment.MedicalRecordDetailId = appointmentDTO.MedicalRecordDetailId;
-            appointment.EmployeeId = appointmentDTO.EmployeeId;
-            appointment.PatientId = appointmentDTO.PatientId;
-            appointment.DoctorId = appointmentDTO.DoctorId;
-            appointment.Note = appointmentDTO.Note;
-            appointment.Status = appointmentDTO.Status;
-            appointment.DeleteFlag = appointmentDTO.DeleteFlag;
-            _context.SaveChanges();
+                var appointment = _context.Appointments.Include(m => m.MedicalRecordDetail)
+                    .FirstOrDefault(a => a.AppointmentId == id);
+                if (appointment == null)
+                {
+                    return NotFound();
+                }
+                appointment.MedicalRecordDetailId = appointmentDTO.MedicalRecordDetailId;
+                appointment.EmployeeId = appointmentDTO.EmployeeId;
+                appointment.PatientId = appointmentDTO.PatientId;
+                appointment.DoctorId = appointmentDTO.DoctorId;
+                appointment.Note = appointmentDTO.Note;
+                appointment.Status = appointmentDTO.Status;
+                appointment.DeleteFlag = appointmentDTO.DeleteFlag;
+                _context.SaveChanges();
 
-            if(appointment.Status == "Done")
-            {
+                if (appointment.Status == "Doned")
+                {
+                    var medicalRecord = _context.MedicalRecords.FirstOrDefault(x => x.PatientId == appointment.PatientId);
+                    // Tạo ra medical record details mới vì khám bệnh mới 
+                    if (appointmentDTO.MedicalRecordDetailId == null)
+                    {
 
+                        var MedicalRecordDetail = new MedicalRecordDetail
+                        {
+                            MedicalRecordId = medicalRecord.MedicalRecordId,
+                            DeleteFlag = false
+                        };
+                        try
+                        {
+                            _context.MedicalRecordDetails.Add(MedicalRecordDetail);
+                            _context.SaveChanges();
+                            appointment.MedicalRecordDetailId = MedicalRecordDetail.MrDetailId;
+                            _context.SaveChanges();
+                        }
+                        catch (Exception ex)
+                        {
+                            return BadRequest("Thêm mới hồ sơ thất bại");
+                        }
+                    }
+                    
+                    
+                }
+                return NoContent();
             }
-            return NoContent();
+            catch (Exception ex) { return BadRequest(ex.Message); }
+
         }
 
         [HttpDelete("{id}")]

@@ -18,4 +18,26 @@
         public string? Status { get; set; }
         public bool? DeleteFlag { get; set; }
     }
+
+    public class AddAppointmentDTO
+    {
+        public int? MedicalRecordDetailId { get; set; }
+        public int? EmployeeId { get; set; }
+        public int? PatientId { get; set; }
+        public int? DoctorId { get; set; }
+        public DateTime? Datetime { get; set; }
+        public string? Note { get; set; }
+    }
+
+    public class UpdateAppointmentDTO
+    {
+        public int? MedicalRecordDetailId { get; set; }
+        public int? EmployeeId { get; set; }
+        public int? PatientId { get; set; }
+        public int? DoctorId { get; set; }
+        public DateTime? Datetime { get; set; }
+        public string? Note { get; set; }
+        public string? Status { get; set; }
+        public bool? DeleteFlag { get; set; }
+    }
 }
