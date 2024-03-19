@@ -1,5 +1,4 @@
-﻿global using DentalClinicProject.Services.UserService;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +9,7 @@ using System.Security.Cryptography;
 using DentalClinicProject.Models;
 using DentalClinicProject.DTO;
 using Microsoft.EntityFrameworkCore;
+using DentalClinicProject.Services.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

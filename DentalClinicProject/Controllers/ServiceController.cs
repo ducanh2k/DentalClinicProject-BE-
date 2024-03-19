@@ -1,8 +1,7 @@
-﻿  using DentalClinicProject.DTO;
+﻿using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
 using DentalClinicProject.Services.Implement;
 using DentalClinicProject.Services.Interface;
-using DentalClinicProject.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

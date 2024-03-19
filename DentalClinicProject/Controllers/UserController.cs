@@ -2,6 +2,7 @@
 using Azure.Core;
 using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
+using DentalClinicProject.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace DentalClinicProject.Controllers
 {
@@ -16,65 +18,26 @@ namespace DentalClinicProject.Controllers
     [ApiController]
     public class UserController : Controller
     {
-        IMapper _mapper;
-        private readonly dentalContext _context;
-        private readonly IConfiguration _configuration;
-        public readonly int PageSize;
-        public UserController(dentalContext context, IMapper mapper, IConfiguration configuration)
-        {
-            _context = context;
-            _mapper = mapper;
-            _configuration = configuration;
-            PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
-        }
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        {
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
-        }
+        private readonly IUserService userService;
 
-        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        public UserController(IUserService _userService)
         {
-            using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return computedHash.SequenceEqual(passwordHash);
-            }
+            userService = _userService;
         }
-
-        //get all 
+        
         [HttpGet("list")]
         public IActionResult GetUsers(int pageNumber)
         {
-            var totalUsers = _context.Users
-                              .Count(s => s.DeleteFlag == false);
-
-            var totalPages = (int)Math.Ceiling((double)totalUsers / PageSize);
-            var getPageNumber = pageNumber;
-            if (pageNumber <= 0) getPageNumber += 1;
-            if (pageNumber > totalPages) getPageNumber = totalPages;
-            
-            List<User> users = _context.Users
-                .Include(r => r.RoleNavigation)
-                .Where(x => x.DeleteFlag == false)
-                .Skip((getPageNumber - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-            if (users == null || users.Count == 0)
+            try
             {
-                return NotFound("Không có dịch vụ");
+                var results = userService.GetUsers(pageNumber);
+                return Ok(results);
+            }catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
-            //map
-            List<UserDTO> results = new List<UserDTO>();
-            results = users.Select(_mapper.Map<User, UserDTO>).ToList();
-            return Ok(results);
         }
 
-
-        //search name
         [HttpGet("search")]
         public IActionResult GetUsersByName(string keyword, int pageNumber)
         {
@@ -82,70 +45,30 @@ namespace DentalClinicProject.Controllers
             {
                 return BadRequest("Từ khóa tìm kiếm không được để trống");
             }
-            var totalUsers = _context.Users
-                              .Count(s => s.DeleteFlag == false);
-
-            var totalPages = (int)Math.Ceiling((double)totalUsers / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-
-            var users = _context.Users
-                .Include(r => r.RoleNavigation)
-                .Where(s => s.Name.Contains(keyword) || s.Email.Contains(keyword) || s.Phone.Contains(keyword) && s.DeleteFlag == false)
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-
-            if (users == null || users.Count == 0)
+            try
             {
-                return NotFound("Không có dịch vụ nào phù hợp");
+                var results = userService.GetUsersByName(keyword,pageNumber);
+                return Ok(results);
             }
-
-            //map
-            List<UserDTO> results = new List<UserDTO>();
-            results = users.Select(_mapper.Map<User, UserDTO>).ToList();
-            return Ok(results);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         public IActionResult GetUser(int id)
         {
-       
-            var user = _context.Users
-        .Where(u => u.UserId == id)
-        .Select(u => new
-        {
-            User = new
+
+            try
             {
-                u.UserId,
-                u.DateCreated,
-                u.Name,
-                u.Phone,
-                u.Email,
-                u.Img,
-                u.Description,
-                u.Salary,
-                u.PasswordHash,
-                u.PasswordSalt,
-                u.RefreshToken,
-                u.TokenCreated,
-                u.TokenExpires,
-                u.DeleteFlag,
-                u.Role,
-                RoleName = u.RoleNavigation.Name
-            },
-            Degrees = u.Degrees.Select(d => new { d.Id, d.Detail }),
-            AreasOfExpertises = u.AreasOfExpertises.Select(a => new { a.Id, a.Detail }),
-            ForeignLanguages = u.ForeignLanguages.Select(f => new { f.Id, f.Detail }),
-            ParticipatingTrainingCourses = u.ParticipatingTrainingCourses.Select(p => new { p.Id, p.Detail })
-        })
-        .FirstOrDefault();
-            if (user == null)
-            {
-                return NotFound("Không có ");
+                var results = userService.GetUser(id);
+                return Ok(results);
             }
-            return Ok(user);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost]
@@ -153,41 +76,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-
-                CreatePasswordHash(userDTO.password, out byte[] passwordHash, out byte[] passwordSalt);
-
-                var user = new User
-                {
-                    Name = userDTO.Name,
-                    DateCreated = DateTime.Now,
-                    Phone = userDTO.Phone,
-                    Email = userDTO.Email,
-                    Img = userDTO.Img,
-                    Description = userDTO.Description,
-                    Role = userDTO.RoleId,
-                    PasswordHash = passwordHash,
-                    PasswordSalt = passwordSalt,
-                    DeleteFlag = false
-                };
-                _context.Users.Add(user);
-                _context.SaveChanges();
-
-                try
-                {
-                    // add medical record when create account
-                    var record = new MedicalRecord
-                    {
-                        PatientId = user.UserId,
-                        DeleteFlag = false
-                    };
-                    _context.MedicalRecords.Add(record);
-                    _context.SaveChanges();
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest("Thêm mới hồ sơ thất bại");
-                }
-
+                userService.AddUser(userDTO);
                 return Ok("Thêm mới người dùng thành công");
             }
             catch (Exception ex)
@@ -200,69 +89,43 @@ namespace DentalClinicProject.Controllers
         [HttpPut("{id}")]
         public ActionResult UpdateUser(int id, UserDTO userDTO)
         {
-            var user = _context.Users.FirstOrDefault(o => o.UserId == id);
-            if (user == null)
+            try
             {
-                return NotFound();
-            }
-
-            try {
-                user.Name = userDTO.Name;
-                user.Phone = userDTO.Phone;
-                user.Email = userDTO.Email;
-                user.Img = userDTO.Img;
-                user.Description = userDTO.Description;
-                user.Salary = userDTO.Salary;
-                user.Role = userDTO.RoleId;
-                user.DeleteFlag = userDTO.DeleteFlag;
+                userService.UpdateUser(id, userDTO);
+                return Ok("Thêm mới người dùng thành công");
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest("Thêm mới thất bại");
             }
-                
-            _context.SaveChanges();
-            return NoContent();
         }
 
         [HttpPut("changePassword/{id}")]
         public ActionResult ChangeUserPassword(int id, string Oldpassword, string Newpassword)
         {
-            var user = _context.Users.FirstOrDefault(o => o.UserId == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
             try
             {
-                if (!VerifyPasswordHash(Oldpassword, user.PasswordHash, user.PasswordSalt))
-                {
-                    return BadRequest("Wrong password.");
-                }
-                CreatePasswordHash(Newpassword, out byte[] passwordHash, out byte[] passwordSalt);
-                user.PasswordHash = passwordHash;
-                user.PasswordSalt = passwordSalt;
+                userService.ChangeUserPassword(id, Oldpassword, Newpassword);
+                return Ok("Thêm mới người dùng thành công");
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest("Thêm mới thất bại");
             }
-            _context.SaveChanges();
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public ActionResult DeleteUser(int id)
         {
-            var user = _context.Users.FirstOrDefault(o => o.UserId == id);
-            if (user == null)
+            try
             {
-                return NotFound();
+                userService.DeleteUser(id);
+                return Ok("Thêm mới người dùng thành công");
             }
-            user.DeleteFlag = true;
-            _context.SaveChanges();
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest("Thêm mới thất bại");
+            }
         }
 
         // CRUD Degree
@@ -271,26 +134,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var user = _context.Users.FirstOrDefault(x => x.UserId == userId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-
-                var degrees = _context.Degrees
-                    .Where(d => d.EmployeeId == userId)
-                    .Select(d => new
-                    {
-                        d.Id,
-                        d.EmployeeId,
-                        d.Detail
-                    })
-                    .ToList();
-
-                if (degrees == null || degrees.Count == 0)
-                {
-                    return NotFound("Không có gi");
-                }
+                var degrees = userService.GetDegreesByUserId(userId);
                 return Ok(degrees);
             }
             catch (Exception ex)
@@ -304,13 +148,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var degrees = _context.Degrees
-                    .Select(d => new
-                    {
-                        d.Id,
-                        d.EmployeeId,
-                        d.Detail
-                    }).FirstOrDefault(x => x.Id == Id);
+                var degrees = userService.GetDegree(Id);
 
                 return Ok(degrees);
             }
@@ -323,24 +161,9 @@ namespace DentalClinicProject.Controllers
         [HttpPost("degree")]
         public IActionResult AddDegree(DegreeDTO degreeDTO)
         {
-            // Chuyển đổi từ DegreeDTO sang Degree nếu cần
             try
             {
-                var degree = new Degree
-                {
-                    EmployeeId = degreeDTO.EmployeeId,
-                    Detail = degreeDTO.Detail
-                };
-
-                var user = _context.Users.FirstOrDefault(x => x.UserId == degree.EmployeeId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-
-                _context.Degrees.Add(degree);
-                _context.SaveChanges();
-
+                userService.AddDegree(degreeDTO);
                 return Ok("Degree đã được thêm thành công");
             }
             catch (Exception ex)
@@ -356,22 +179,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var degree = _context.Degrees.FirstOrDefault(d => d.Id == id);
-
-                if (degree == null)
-                {
-                    return NotFound("Không tìm thấy degree");
-                }
-
-                // Cập nhật thông tin degree
-                degree.EmployeeId = degreeDTO.EmployeeId;
-                degree.Detail = degreeDTO.Detail;
-                var user = _context.Users.FirstOrDefault(x => x.UserId == degree.EmployeeId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-                _context.SaveChanges();
+                userService.UpdateDegree(id, degreeDTO);
 
                 return Ok("Degree đã được cập nhật thành công");
             }
@@ -387,14 +195,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var degree = _context.Degrees.FirstOrDefault(d => d.Id == id);
-                if (degree == null)
-                {
-                    return NotFound("Không tìm thấy degree");
-                }
-
-                _context.Degrees.Remove(degree);
-                _context.SaveChanges();
+                userService.DeleteDegree(id);
 
                 return Ok("Degree đã được xóa thành công");
             }
@@ -412,25 +213,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var user = _context.Users.FirstOrDefault(r => r.UserId == userId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-                var AreasOfExpertises = _context.AreasOfExpertises
-                        .Where(d => d.EmployeeId == userId)
-                        .Select(d => new
-                        {
-                            d.Id,
-                            d.EmployeeId,
-                            d.Detail
-                        })
-                        .ToList();
-
-                if (AreasOfExpertises == null || AreasOfExpertises.Count == 0)
-                {
-                    return NotFound("Không có gi");
-                }
+                var AreasOfExpertises = userService.GetAreasOfExpertisesByUserId(userId);
                 return Ok(AreasOfExpertises);
             }
             catch (Exception ex)
@@ -446,25 +229,7 @@ namespace DentalClinicProject.Controllers
             try
             {
                 
-                var AreasOfExpertises = _context.AreasOfExpertises
-                        .Select(d => new
-                        {
-                            d.Id,
-                            d.EmployeeId,
-                            d.Detail
-                        })
-                        .FirstOrDefault(d => d.Id == Id);
-
-                var user = _context.Users.FirstOrDefault(r => r.UserId == AreasOfExpertises.EmployeeId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-
-                if (AreasOfExpertises == null)
-                {
-                    return NotFound("Không có gi");
-                }
+                var AreasOfExpertises = userService.GetAreasOfExpertise(Id);
                 return Ok(AreasOfExpertises);
             }
             catch (Exception ex)
@@ -479,19 +244,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var areaOfExpertise = new AreasOfExpertise
-                {
-                    EmployeeId = areaOfExpertiseDTO.EmployeeId,
-                    Detail = areaOfExpertiseDTO.Detail
-                };
-                var user = _context.Users.FirstOrDefault(r => r.UserId == areaOfExpertise.EmployeeId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-                _context.AreasOfExpertises.Add(areaOfExpertise);
-                _context.SaveChanges();
-
+                userService.AddAreaOfExpertise(areaOfExpertiseDTO);
                 return Ok("Kỹ năng chuyên môn đã được thêm thành công");
             }
             catch (Exception ex)
@@ -505,21 +258,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var areaOfExpertise = _context.AreasOfExpertises.FirstOrDefault(a => a.Id == id);
-                if (areaOfExpertise == null)
-                {
-                    return NotFound("Không tìm thấy kỹ năng chuyên môn");
-                }
-
-                // Cập nhật thông tin kỹ năng chuyên môn
-                areaOfExpertise.EmployeeId = updatedAreaOfExpertiseDTO.EmployeeId;
-                areaOfExpertise.Detail = updatedAreaOfExpertiseDTO.Detail;
-                var user = _context.Users.FirstOrDefault(r => r.UserId == areaOfExpertise.EmployeeId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-                _context.SaveChanges();
+                userService.UpdateAreaOfExpertise(id, updatedAreaOfExpertiseDTO);
 
                 return Ok("Kỹ năng chuyên môn đã được cập nhật thành công");
             }
@@ -534,14 +273,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var areaOfExpertise = _context.AreasOfExpertises.FirstOrDefault(a => a.Id == id);
-                if (areaOfExpertise == null)
-                {
-                    return NotFound("Không tìm thấy kỹ năng chuyên môn");
-                }
-
-                _context.AreasOfExpertises.Remove(areaOfExpertise);
-                _context.SaveChanges();
+                userService.DeleteAreaOfExpertise(id);
 
                 return Ok("Kỹ năng chuyên môn đã được xóa thành công");
             }
@@ -557,25 +289,8 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var user = _context.Users.FirstOrDefault(r => r.UserId == userId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-                var ForeignLanguages = _context.ForeignLanguages
-                        .Where(d => d.EmployeeId == userId)
-                        .Select(d => new
-                        {
-                            d.Id,
-                            d.EmployeeId,
-                            d.Detail
-                        })
-                        .ToList();
-
-                if (ForeignLanguages == null || ForeignLanguages.Count == 0)
-                {
-                    return NotFound("Không có gi");
-                }
+                
+                var ForeignLanguages = userService.GetForeignLanguagesByUserId(userId);
                 return Ok(ForeignLanguages);
             }
             catch (Exception ex)
@@ -592,23 +307,7 @@ namespace DentalClinicProject.Controllers
             try
             {
                 
-                var ForeignLanguages = _context.ForeignLanguages
-                        .Select(d => new
-                        {
-                            d.Id,
-                            d.EmployeeId,
-                            d.Detail
-                        })
-                        .FirstOrDefault(d => d.Id == Id);
-                var user = _context.Users.FirstOrDefault(r => r.UserId == ForeignLanguages.EmployeeId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-                if (ForeignLanguages == null)
-                {
-                    return NotFound("Không có gi");
-                }
+                var ForeignLanguages = userService.GetForeignLanguage(Id);
                 return Ok(ForeignLanguages);
             }
             catch (Exception ex)
@@ -624,18 +323,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var foreignLanguage = new ForeignLanguage
-                {
-                    EmployeeId = foreignLanguageDTO.EmployeeId,
-                    Detail = foreignLanguageDTO.Detail
-                };
-                var user = _context.Users.FirstOrDefault(r => r.UserId == foreignLanguage.EmployeeId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-                _context.ForeignLanguages.Add(foreignLanguage);
-                _context.SaveChanges();
+                userService.AddForeignLanguage(foreignLanguageDTO);
 
                 return Ok("Ngoại ngữ đã được thêm thành công");
             }
@@ -651,21 +339,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var foreignLanguage = _context.ForeignLanguages.FirstOrDefault(f => f.Id == id);
-                if (foreignLanguage == null)
-                {
-                    return NotFound("Không tìm thấy ngoại ngữ");
-                }
-
-                // Cập nhật thông tin ngoại ngữ
-                foreignLanguage.EmployeeId = updatedForeignLanguageDTO.EmployeeId;
-                foreignLanguage.Detail = updatedForeignLanguageDTO.Detail;
-                var user = _context.Users.FirstOrDefault(r => r.UserId == foreignLanguage.EmployeeId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-                _context.SaveChanges();
+                userService.UpdateForeignLanguage(id, updatedForeignLanguageDTO);
 
                 return Ok("Ngoại ngữ đã được cập nhật thành công");
             }
@@ -682,23 +356,13 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-
+                userService.DeleteForeignLanguage(id);
+                return Ok("Ngoại ngữ đã được xóa thành công");
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-
-            var foreignLanguage = _context.ForeignLanguages.FirstOrDefault(f => f.Id == id);
-            if (foreignLanguage == null)
-            {
-                return NotFound("Không tìm thấy ngoại ngữ");
-            }
-
-            _context.ForeignLanguages.Remove(foreignLanguage);
-            _context.SaveChanges();
-
-            return Ok("Ngoại ngữ đã được xóa thành công");
         }
 
 
@@ -707,26 +371,8 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var user = _context.Users.FirstOrDefault(r => r.UserId == userId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
 
-                var ParticipatingTrainingCourses = _context.ParticipatingTrainingCourses
-                        .Where(d => d.EmployeeId == userId)
-                        .Select(d => new
-                        {
-                            d.Id,
-                            d.EmployeeId,
-                            d.Detail
-                        })
-                        .ToList();
-
-                if (ParticipatingTrainingCourses == null || ParticipatingTrainingCourses.Count == 0)
-                {
-                    return NotFound("Không có gi");
-                }
+                var ParticipatingTrainingCourses = userService.GetParticipatingTrainingCoursesByUserId(userId);
                 return Ok(ParticipatingTrainingCourses);
             }
             catch (Exception ex)
@@ -741,25 +387,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                
-
-                var ParticipatingTrainingCourses = _context.ParticipatingTrainingCourses
-                        .Select(d => new
-                        {
-                            d.Id,
-                            d.EmployeeId,
-                            d.Detail
-                        })
-                        .FirstOrDefault(d => d.Id == Id);
-                var user = _context.Users.FirstOrDefault(r => r.UserId == ParticipatingTrainingCourses.EmployeeId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-                if (ParticipatingTrainingCourses == null)
-                {
-                    return NotFound("Không có gi");
-                }
+                var ParticipatingTrainingCourses = userService.GetParticipatingTrainingCourse(Id);
                 return Ok(ParticipatingTrainingCourses);
             }
             catch (Exception ex)
@@ -774,18 +402,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var participatingTrainingCourse = new ParticipatingTrainingCourse
-                {
-                    EmployeeId = participatingTrainingCourseDTO.EmployeeId,
-                    Detail = participatingTrainingCourseDTO.Detail
-                };
-                var user = _context.Users.FirstOrDefault(r => r.UserId == participatingTrainingCourse.EmployeeId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-                _context.ParticipatingTrainingCourses.Add(participatingTrainingCourse);
-                _context.SaveChanges();
+                userService.AddParticipatingTrainingCourse(participatingTrainingCourseDTO);
 
                 return Ok("Khóa đào tạo đã được thêm thành công");
             }
@@ -801,21 +418,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var participatingTrainingCourse = _context.ParticipatingTrainingCourses.FirstOrDefault(p => p.Id == id);
-                if (participatingTrainingCourse == null)
-                {
-                    return NotFound("Không tìm thấy khóa đào tạo");
-                }
-                var user = _context.Users.FirstOrDefault(r => r.UserId == participatingTrainingCourse.EmployeeId);
-                if (user.Role != 3)
-                {
-                    return BadRequest("Người dùng không phải là bác sĩ");
-                }
-                // Cập nhật thông tin khóa đào tạo
-                participatingTrainingCourse.EmployeeId = updatedParticipatingTrainingCourseDTO.EmployeeId;
-                participatingTrainingCourse.Detail = updatedParticipatingTrainingCourseDTO.Detail;
-
-                _context.SaveChanges();
+                userService.UpdateParticipatingTrainingCourse(id, updatedParticipatingTrainingCourseDTO);
 
                 return Ok("Khóa đào tạo đã được cập nhật thành công");
             }
@@ -831,14 +434,7 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var participatingTrainingCourse = _context.ParticipatingTrainingCourses.FirstOrDefault(p => p.Id == id);
-                if (participatingTrainingCourse == null)
-                {
-                    return NotFound("Không tìm thấy khóa đào tạo");
-                }
-
-                _context.ParticipatingTrainingCourses.Remove(participatingTrainingCourse);
-                _context.SaveChanges();
+                userService.DeleteParticipatingTrainingCourse(id);
 
                 return Ok("Khóa đào tạo đã được xóa thành công");
             }
