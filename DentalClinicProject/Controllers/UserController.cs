@@ -149,10 +149,13 @@ namespace DentalClinicProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddUser(UserDTO userDTO)
+        public IActionResult AddUser(UserRegisterDTO userDTO)
         {
             try
             {
+
+                CreatePasswordHash(userDTO.password, out byte[] passwordHash, out byte[] passwordSalt);
+
                 var user = new User
                 {
                     Name = userDTO.Name,
@@ -161,10 +164,9 @@ namespace DentalClinicProject.Controllers
                     Email = userDTO.Email,
                     Img = userDTO.Img,
                     Description = userDTO.Description,
-                    Salary = userDTO.Salary,
                     Role = userDTO.RoleId,
-                    //PasswordHash = userDTO.PasswordHash,
-                    //PasswordSalt = userDTO.PasswordSalt,
+                    PasswordHash = passwordHash,
+                    PasswordSalt = passwordSalt,
                     DeleteFlag = false
                 };
                 _context.Users.Add(user);

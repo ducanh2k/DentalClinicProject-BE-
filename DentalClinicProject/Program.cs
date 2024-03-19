@@ -1,5 +1,7 @@
 using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
+using DentalClinicProject.Services.Implement;
+using DentalClinicProject.Services.Interface;
 using DentalClinicProject.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -18,9 +20,18 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+// Config Denfency Injection
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+
+
 builder.Services.AddHttpContextAccessor();
+//Config automapper
 builder.Services.AddAutoMapper(typeof(MyMapperProfile));
+
+//Config db
 builder.Services.AddDbContext<dentalContext>(
     option => option.UseSqlServer(builder.Configuration.GetConnectionString("MyDB")));
 

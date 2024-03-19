@@ -29,6 +29,10 @@ namespace DentalClinicProject.DTO
         public string? Email { get; set; }
         public int? RoleId { get; set; }
         public String? password { get; set; }
+        public string? Name { get; set; }
+        public string? Phone { get; set; }
+        public string? Img { get; set; }
+        public string? Description { get; set; }
 
         public bool IsValidRole()
         {
