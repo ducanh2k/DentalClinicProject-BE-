@@ -25,6 +25,7 @@ builder.Services.AddSwaggerGen();
 // Config Denfency Injection
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 
 
 builder.Services.AddHttpContextAccessor();
