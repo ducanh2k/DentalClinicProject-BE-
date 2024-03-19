@@ -32,41 +32,6 @@ namespace DentalClinicProject.Controllers
         }
 
 
-        [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(UserRegisterDTO request)
-        {
-            CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
-
-
-            if (!request.IsValidRole())
-            {
-                return BadRequest(new { Error = "Vai trò không đúng đề nghị nhập lại" });
-            }
-            user = new User();
-
-            user.Email = request.Email;
-            user.Role = 1;
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
-            //user.Phone = request.Phone;
-            //user.Name = request.Name;
-            //user.Description = request.Description;
-            user.Role = request.RoleId;
-            //user.Salary = request.Salary;
-            user.DateCreated = DateTime.Now;
-            try
-            {
-                _context.Users.Add(user);
-                _context.SaveChanges();
-                return Ok(user);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(user);
-            }
-            
-        }
-
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserLoginDTO request)
         {
