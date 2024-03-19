@@ -26,7 +26,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
-
+builder.Services.AddScoped<IMaterialService, MaterialService>();
 
 builder.Services.AddHttpContextAccessor();
 //Config automapper

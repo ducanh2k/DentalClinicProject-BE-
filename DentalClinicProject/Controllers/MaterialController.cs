@@ -1,6 +1,8 @@
 ﻿using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
+using DentalClinicProject.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace DentalClinicProject.Controllers
 {
@@ -8,131 +10,96 @@ namespace DentalClinicProject.Controllers
     [ApiController]
     public class MaterialController : Controller
     {
-        
-        private readonly dentalContext _context;
-        private readonly IConfiguration _configuration;
-        private readonly int PageSize;
-        public MaterialController(dentalContext context, IConfiguration configuration)
+
+        private readonly IMaterialService materialService;
+
+        public MaterialController(IMaterialService _materialService)
         {
-            _context = context;
-            _configuration = configuration;
-            PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
+            materialService = _materialService;
         }
 
-        //get all 
         [HttpGet("list")]
         public IActionResult GetMaterials(int pageNumber)
         {
-            var totalMats = _context.Materials
-                              .Count(s => s.DeleteFlag == false);
-
-            var totalPages = (int)Math.Ceiling((double)totalMats / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            var Materials = _context.Materials
-                .Where(s => s.DeleteFlag == false)
-                        .Skip((pageNumber - 1) * PageSize)
-                        .Take(PageSize)
-                .ToList();
-            if (Materials == null || Materials.Count == 0)
+            try
             {
-                return NotFound("Không có dịch vụ");
+                var materials = materialService.GetMaterials(pageNumber);
+                return Ok(materials);
+            }catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
-            return Ok(Materials);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetMaterial(int id)
         {
-            var ser = _context.Materials
-                .Where(x => x.MaterialId == id)
-                .FirstOrDefault();
-
-            if (ser == null)
+            try
             {
-                return NotFound("Không có");
+                var materials = materialService.GetMaterialById(id);
+                return Ok(materials);
             }
-            return Ok(ser);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         //search name
         [HttpGet("search")]
         public IActionResult GetMaterialsByName(string keyword, int pageNumber)
         {
-            if (string.IsNullOrWhiteSpace(keyword))
+            try
             {
-                return BadRequest("Từ khóa tìm kiếm không được để trống");
+                var materials = materialService.GetMaterialsByName(keyword,pageNumber);
+                return Ok(materials);
             }
-            var Materials = _context.Materials
-               .Where(s => s.MaterialName.Contains(keyword)
-               || s.Supplier.Contains(keyword)
-               && s.DeleteFlag == false
-               )
-               .ToList();
-
-            var totalMats = Materials.Count();
-
-            var totalPages = (int)Math.Ceiling((double)totalMats / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            Materials = Materials
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize).ToList();
-
-            if (Materials == null || Materials.Count == 0)
+            catch (Exception ex)
             {
-                return NotFound("Không có dịch vụ nào phù hợp");
+                return BadRequest(ex.Message);
             }
-
-            return Ok(Materials);
         }
 
         [HttpPost]
         public IActionResult AddMaterial(Material mat)
         {
-            
             try
             {
-                _context.Materials.Add(mat);
-                _context.SaveChanges();
-                return Ok("Thêm mới thành công");
+                materialService.AddMaterial(mat);
+                return Ok("Thêm mới vật liệu thành công");
             }
             catch (Exception ex)
             {
-                return BadRequest("Thêm mới thất bại");
+                return BadRequest("Thêm mới vật liệu thất bại");
             }
         }
 
         [HttpPut("{id}")]
         public ActionResult UpdateMaterial(int id, Material mat)
         {
-            var material = _context.Materials.FirstOrDefault(o => o.MaterialId == id);
-            if (material == null)
+            try
             {
-                return NotFound();
+                materialService.UpdateMaterial(id,mat);
+                return Ok("Cập nhật vật liệu thành công");
             }
-            material.MaterialName = mat.MaterialName;
-            material.Supplier = mat.Supplier;
-            material.UnitPrice = mat.UnitPrice;
-            material.QuantityInStock = mat.QuantityInStock;
-            material.Type = mat.Type;
-            _context.SaveChanges();
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest("Cập nhật vật liệu thất bại");
+            }
         }
 
         [HttpDelete("{id}")]
         public ActionResult DeleteMaterial(int id)
         {
-            var material = _context.Materials.FirstOrDefault(o => o.MaterialId == id);
-            if (material == null)
+            try
             {
-                return NotFound();
+                materialService.DeleteMaterial(id);
+                return Ok("Xóa vật liệu thành công");
             }
-            material.DeleteFlag = true;
-            _context.SaveChanges();
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest("Xóa vật liệu thất bại");
+            }
         }
     }
 }
