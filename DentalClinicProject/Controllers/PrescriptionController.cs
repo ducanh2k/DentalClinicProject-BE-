@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
+using DentalClinicProject.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,43 +11,24 @@ namespace DentalClinicProject.Controllers
     [ApiController]
     public class PrescriptionController : Controller
     {
-        IMapper _mapper;
-        private readonly dentalContext _context;
-        private readonly IConfiguration _configuration;
-        public readonly int PageSize;
-        public PrescriptionController(dentalContext context, IMapper mapper, IConfiguration configuration)
+        private readonly IPrescriptionService prescriptionService;
+        public PrescriptionController(IPrescriptionService _prescriptionService)
         {
-            _context = context;
-            _mapper = mapper;
-            _configuration = configuration;
-            PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
+            prescriptionService = _prescriptionService;
         }
 
         [HttpGet("list")]
         public IActionResult GetPrescriptions(int pageNumber)
         {
-            var totalPrescriptions = _context.Prescriptions
-                              .Count(s => s.DeleteFlag == false);
-
-            var totalPages = (int)Math.Ceiling((double)totalPrescriptions / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            List<Prescription> prescriptions = _context.Prescriptions
-                .Include(d => d.Doctor)
-                .Where(x => x.DeleteFlag == false)
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-            if (prescriptions == null || prescriptions.Count == 0)
+            try
             {
-                return NotFound("Không có đơn thuốc");
+                var results = prescriptionService.GetPrescriptions(pageNumber);
+                return Ok(results);
             }
-
-            //map
-            List<PrescriptionDTO> results = new List<PrescriptionDTO>();
-            results = prescriptions.Select(_mapper.Map<Prescription, PrescriptionDTO>).ToList();
-            return Ok(results);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);  
+            }
         }
 
         [HttpGet("search")]
@@ -57,35 +39,15 @@ namespace DentalClinicProject.Controllers
                 return BadRequest("Từ khóa tìm kiếm không được để trống");
             }
 
-            List<Prescription> prescriptions = _context.Prescriptions
-                .Include(d => d.Doctor)
-                .Where(x =>
-                x.Note.Contains(keyword)
-                && x.PrescriptionId.Equals(keyword)
-                && x.Doctor.Name.Contains(keyword)
-                && x.DeleteFlag == false)
-                .ToList();
-
-            if (prescriptions == null || prescriptions.Count == 0)
+            try
             {
-                return NotFound("Không có đơn thuốc");
+                var results = prescriptionService.GetPrescriptionsBySearch(keyword, pageNumber);
+                return Ok(results);
             }
-
-            var totalPrescriptions = prescriptions.Count();
-
-            var totalPages = (int)Math.Ceiling((double)totalPrescriptions / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            prescriptions = prescriptions
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-
-            //map
-            List<PrescriptionDTO> results = new List<PrescriptionDTO>();
-            results = prescriptions.Select(_mapper.Map<Prescription, PrescriptionDTO>).ToList();
-            return Ok(results);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
@@ -93,89 +55,57 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var prescription = _context.Prescriptions
-                .Include(p => p.PrescriptionDetails)
-                    .ThenInclude(pd => pd.Medicine)
-                .FirstOrDefault(x => x.PrescriptionId == id);
-
-                if (prescription == null)
-                {
-                    return NotFound("Không có đơn thuốc");
-                }
-
-                var medicines = prescription.PrescriptionDetails
-                    .Select(pd => new
-                    {
-                        pd.Medicine.Name,
-                        pd.Quantity,
-                        pd.Medicine.Dosage
-                    })
-                    .ToList();
-
-                var result = new
-                {
-                    Medicines = medicines,
-                    DoctorNote = prescription.Note
-                };
+                var result = prescriptionService.GetPrescription(id);
 
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.ToString());
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpPost]
         public IActionResult AddPrescription(PrescriptionDTO PrescriptionDTO)
         {
-            var prescription = new Prescription
-            {
-                CreatedDate = DateTime.Now,
-                DoctorId = PrescriptionDTO.DoctorId,
-                Note = PrescriptionDTO.Note,
-                DeleteFlag = false
-
-
-            };
+            
             try
             {
-                _context.Prescriptions.Add(prescription);
-                _context.SaveChanges();
-                return Ok("Thêm mới thành công");
+                prescriptionService.AddPrescription(PrescriptionDTO);
+                return Ok("Thêm mới đơn thuốc thành công");
             }
             catch (Exception ex)
             {
-                return BadRequest("Thêm mới thất bại");
+                return BadRequest("Thêm mới đơn thuốc thất bại");
             }
         }
 
         [HttpPut("{id}")]
         public ActionResult UpdatePrescriptions(int id, PrescriptionDTO PrescriptionDTO)
         {
-            var prescription = _context.Prescriptions.FirstOrDefault(o => o.PrescriptionId == id);
-            if (prescription == null)
+            try
             {
-                return NotFound();
+                prescriptionService.UpdatePrescriptions(id,PrescriptionDTO);
+                return Ok("Cập nhật đơn thuốc thành công");
             }
-            prescription.DoctorId = PrescriptionDTO.DoctorId;
-            prescription.Note = PrescriptionDTO.Note;
-            prescription.DeleteFlag = PrescriptionDTO.DeleteFlag;
-            _context.SaveChanges();
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest("Cập nhật đơn thuốc thất bại");
+            }
         }
 
         [HttpDelete("{id}")]
         public ActionResult DeletePrescription(int id)
         {
-            var prescription = _context.Prescriptions.FirstOrDefault(o => o.PrescriptionId == id);
-            if (prescription == null)
+            try
             {
-                return NotFound();
+                prescriptionService.DeletePrescription(id);
+                return Ok("Xóa đơn thuốc thành công");
             }
-            prescription.DeleteFlag = true;
-            _context.SaveChanges();
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest("Xóa đơn thuốc thất bại");
+            }
         }
 
     }
