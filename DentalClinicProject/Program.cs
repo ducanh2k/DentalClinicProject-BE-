@@ -30,6 +30,7 @@ builder.Services.AddScoped<IMaterialService, MaterialService>();
 builder.Services.AddScoped<IMedicineService, MedicineService>();
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
 
 
 builder.Services.AddHttpContextAccessor();

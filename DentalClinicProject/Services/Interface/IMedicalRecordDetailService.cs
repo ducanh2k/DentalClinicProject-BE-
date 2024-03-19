@@ -1,6 +1,6 @@
 ﻿namespace DentalClinicProject.Services.Interface
 {
-    public interface IDashboardService
+    public interface IMedicalRecordDetailService
     {
     }
 }
