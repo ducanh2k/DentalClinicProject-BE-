@@ -27,6 +27,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IMaterialService, MaterialService>();
+builder.Services.AddScoped<IMedicineService, MedicineService>();
+builder.Services.AddScoped<INewsService, NewsService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
+
 
 builder.Services.AddHttpContextAccessor();
 //Config automapper
