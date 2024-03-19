@@ -23,6 +23,7 @@ builder.Services.AddSwaggerGen();
 
 // Config Denfency Injection
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IMaterialService, MaterialService>();
