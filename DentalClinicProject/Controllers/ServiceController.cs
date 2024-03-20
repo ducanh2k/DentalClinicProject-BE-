@@ -31,7 +31,7 @@ namespace DentalClinicProject.Controllers
 
 
         
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Doctor, Admin")]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Doctor, Admin")]
         [HttpGet("list")]
         public IActionResult GetServices(int pageNumber)
         {
