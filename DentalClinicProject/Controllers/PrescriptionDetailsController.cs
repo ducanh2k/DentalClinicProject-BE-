@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
+using DentalClinicProject.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace DentalClinicProject.Controllers
 {
@@ -10,43 +12,24 @@ namespace DentalClinicProject.Controllers
     [ApiController]
     public class PrescriptionDetailsController : Controller
     {
-        IMapper _mapper;
-        private readonly dentalContext _context;
-        private readonly IConfiguration _configuration;
-        public readonly int PageSize;
-        public PrescriptionDetailsController(dentalContext context, IMapper mapper, IConfiguration configuration)
+        private readonly IPrescriptionDetailService prescriptionDetailService;
+
+        public PrescriptionDetailsController(IPrescriptionDetailService _prescriptionDetailService)
         {
-            _context = context;
-            _mapper = mapper;
-            _configuration = configuration;
-            PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
+            prescriptionDetailService = _prescriptionDetailService;
         }
 
         [HttpGet("list")]
         public IActionResult GetPrescriptionDetailss(int pageNumber)
         {
-            var totalPrescriptionDetails = _context.PrescriptionDetails
-                              .Count(s => s.DeleteFlag == false);
-
-            var totalPages = (int)Math.Ceiling((double)totalPrescriptionDetails / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            List<PrescriptionDetail> prescriptionDetails = _context.PrescriptionDetails
-                .Include(d => d.Medicine)
-                .Where(x => x.DeleteFlag == false)
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-            if (prescriptionDetails == null || prescriptionDetails.Count == 0)
+            try
             {
-                return NotFound("Không có đơn thuốc");
+                var result = prescriptionDetailService.GetPrescriptionDetailss(pageNumber);
+                return Ok(result);
+            }catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
-
-            //map
-            List<PrescriptionDetailDTO> results = new List<PrescriptionDetailDTO>();
-            results = prescriptionDetails.Select(_mapper.Map<PrescriptionDetail, PrescriptionDetailDTO>).ToList();
-            return Ok(results);
         }
 
         [HttpGet("search")]
@@ -57,149 +40,87 @@ namespace DentalClinicProject.Controllers
                 return BadRequest("Từ khóa tìm kiếm không được để trống");
             }
 
-            List<PrescriptionDetail> prescriptionDetails = _context.PrescriptionDetails
-                .Include(d => d.Medicine)
-                .Where(x =>
-                x.Medicine.Name.Contains(keyword)
-                || x.DosageInstruction.Contains(keyword)
-                && x.DeleteFlag == false)
-                .ToList();
-
-            if (prescriptionDetails == null || prescriptionDetails.Count == 0)
+            try
             {
-                return NotFound("Không có đơn thuốc");
+                var result = prescriptionDetailService.GetPrescriptionsBySearch(keyword,pageNumber);
+                return Ok(result);
             }
-
-            var totalPrescriptionDetails = prescriptionDetails.Count();
-
-            var totalPages = (int)Math.Ceiling((double)totalPrescriptionDetails / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            prescriptionDetails = prescriptionDetails
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-            if (prescriptionDetails == null || prescriptionDetails.Count == 0)
+            catch (Exception ex)
             {
-                return NotFound("Không có đơn thuốc");
+                return BadRequest(ex.Message);
             }
-
-            //map
-            List<PrescriptionDetailDTO> results = new List<PrescriptionDetailDTO>();
-            results = prescriptionDetails.Select(_mapper.Map<PrescriptionDetail, PrescriptionDetailDTO>).ToList();
-            return Ok(results);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetPrescriptionDetail(int id)
         {
-
-            var prescriptions = _context.PrescriptionDetails
-                .Include(d => d.Medicine)
-                .FirstOrDefault(x => x.PrescriptionId == id);
-            if (prescriptions == null)
+            try
             {
-                return NotFound("Không có đơn thuốc");
+                var result = prescriptionDetailService.GetPrescriptionDetail(id);
+                return Ok(result);
             }
-
-            //map
-            var results = _mapper.Map<PrescriptionDetailDTO>(prescriptions);
-            return Ok(results);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("prescription/{prescriptionId}")]
         public IActionResult GetPrescriptionDetails(int prescriptionId)
         {
-            // Tìm đơn thuốc dựa trên prescriptionId
-            var prescription = _context.Prescriptions
-                .Include(p => p.PrescriptionDetails)
-                    .ThenInclude(pd => pd.Medicine)
-                .FirstOrDefault(p => p.PrescriptionId == prescriptionId);
-
-            // Kiểm tra xem đơn thuốc có tồn tại không
-            if (prescription == null)
+            try
             {
-                return NotFound("Không tìm thấy đơn thuốc");
+                var result = prescriptionDetailService.GetPrescriptionDetails(prescriptionId);
+                return Ok(result);
             }
-
-            // Lấy tất cả các chi tiết đơn thuốc của đơn thuốc này
-            var prescriptionDetails = prescription.PrescriptionDetails;
-
-            // Kiểm tra xem có chi tiết đơn thuốc nào không
-            if (prescriptionDetails == null || prescriptionDetails.Count == 0)
+            catch (Exception ex)
             {
-                return NotFound("Đơn thuốc này không có chi tiết");
+                return BadRequest(ex.Message);
             }
-
-            // Map prescriptionDetails sang DTO nếu cần
-            var prescriptionDetailsDTO = prescriptionDetails.Select(pd =>
-                new PrescriptionDetailDTO
-                {
-                    PrescriptionDetailId = pd.PrescriptionDetailId,
-                    PrescriptionId = pd.PrescriptionId,
-                    MedicineId = pd.MedicineId,
-                    MedicineName = pd.Medicine != null ? pd.Medicine.Name : null,
-                    Quantity = pd.Quantity,
-                    DosageInstruction = pd.DosageInstruction,
-                    DeleteFlag = pd.DeleteFlag
-                }).ToList();
-
-            return Ok(prescriptionDetailsDTO);
         }
 
 
         [HttpPost]
         public IActionResult AddPrescription(PrescriptionDetailDTO PrescriptionDetaiDTO)
         {
-            var prescription = new PrescriptionDetail
-            {
-                PrescriptionId = PrescriptionDetaiDTO.PrescriptionId,
-                MedicineId = PrescriptionDetaiDTO.MedicineId,
-                Quantity = PrescriptionDetaiDTO.Quantity,
-                DosageInstruction = PrescriptionDetaiDTO.DosageInstruction,
-                DeleteFlag = false
-            };
+            
             try
             {
-                _context.PrescriptionDetails.Add(prescription);
-                _context.SaveChanges();
-                return Ok("Thêm mới thành công");
+                prescriptionDetailService.AddPrescription(PrescriptionDetaiDTO);
+                return Ok("Thêm mới đơn thuốc thành công"); 
             }
             catch (Exception ex)
             {
-                return BadRequest("Thêm mới thất bại");
+                return BadRequest("Thêm mới đơn thuốc thất bại");
             }
         }
 
         [HttpPut("{id}")]
         public ActionResult UpdatePrescriptions(int id, PrescriptionDetailDTO PrescriptionDetaiDTO)
         {
-            var prescription = _context.PrescriptionDetails.FirstOrDefault(o => o.PrescriptionDetailId == id);
-            if (prescription == null)
+            try
             {
-                return NotFound();
+                prescriptionDetailService.UpdatePrescriptions(id,PrescriptionDetaiDTO);
+                return Ok("Cập nhật đơn thuốc thành công");
             }
-            prescription.PrescriptionId = PrescriptionDetaiDTO.PrescriptionId;
-            prescription.MedicineId = PrescriptionDetaiDTO.MedicineId;
-            prescription.Quantity = PrescriptionDetaiDTO.Quantity;
-            prescription.DosageInstruction = PrescriptionDetaiDTO.DosageInstruction;
-            prescription.DeleteFlag = PrescriptionDetaiDTO.DeleteFlag;
-            _context.SaveChanges();
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest("Cập nhật đơn thuốc thất bại");
+            }
         }
 
         [HttpDelete("{id}")]
         public ActionResult DeletePrescriptionDetail(int id)
         {
-            var prescription = _context.PrescriptionDetails.FirstOrDefault(o => o.PrescriptionId == id);
-            if (prescription == null)
+            try
             {
-                return NotFound();
+                prescriptionDetailService.DeletePrescriptionDetail(id);
+                return Ok("Xóa đơn thuốc thành công");
             }
-            prescription.DeleteFlag = true;
-            _context.SaveChanges();
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest("Xóa đơn thuốc thất bại");
+            }
         }
 
     }

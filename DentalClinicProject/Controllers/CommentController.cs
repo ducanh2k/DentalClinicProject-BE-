@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
+using DentalClinicProject.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
 
 namespace DentalClinicProject.Controllers
 {
@@ -10,138 +12,79 @@ namespace DentalClinicProject.Controllers
     [ApiController]
     public class CommentController : ControllerBase
     {
-        IMapper _mapper;
-        private readonly dentalContext _context;
-        private readonly IConfiguration _configuration;
-        private readonly int PageSize;
+        private readonly ICommentService commentService;
 
-        public CommentController(dentalContext context, IMapper mapper, IConfiguration configuration)
+        public CommentController(ICommentService _commentService)
         {
-            _context = context;
-            _mapper = mapper;
-            _configuration = configuration;
-            PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
+            commentService = _commentService;
         }
 
         [HttpGet("list")]
         public IActionResult GetAllComments(int pageNumber, int type) //type: 1= all,2= dental,3= doctor feedback
         {
-            IQueryable<Comment> query = _context.Comments
-                .Include(a => a.Patient)
-                .Include(a => a.Doctor)
-                .Where(s => s.DeleteFlag == false)
-                .OrderByDescending(a => a.CreatedAt);
-
-            switch (type)
+            try
             {
-                case 2:
-                    query = query.Where(c => c.DoctorId == null);
-                    break;
-                case 3:
-                    query = query.Where(c => c.DoctorId != null);
-                    break;
-                default:
-                    // All comments are included by default, so no filtering needed.
-                    break;
+                var results = commentService.GetAllComments(pageNumber,type);
+                return Ok(results);
             }
-
-            var Comments = query.ToList();
-
-            if (Comments == null || Comments.Count == 0)
+            catch (Exception ex)
             {
-                return NotFound("Không có");
+                return BadRequest(ex.Message);
             }
-
-            var totalComment = Comments.Count();
-            var totalPages = (int)Math.Ceiling((double)totalComment / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-
-            Comments = query
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-
-            var results = Comments.Select(_mapper.Map<Comment, CommentDTO>).ToList();
-
-            return Ok(results);
+            
         }
 
 
         [HttpGet("search")]
         public IActionResult GetCommentsByName(string keyword, int pageNumber)
         {
-            if (string.IsNullOrWhiteSpace(keyword))
+            try
             {
-                return BadRequest("Từ khóa tìm kiếm không được để trống");
+                var results = commentService.GetCommentsByName(keyword,pageNumber);
+                return Ok(results);
             }
-
-            var totalComment = _context.Comments
-                              .Count(s => s.DeleteFlag == false);
-
-            var totalPages = (int)Math.Ceiling((double)totalComment / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            var Comments = _context.Comments
-                        .Include(a => a.Patient)
-                        .Where(s =>
-                        s.CommentDetail.Contains(keyword) ||
-                        s.Patient.Name.Contains(keyword) ||
-                        s.Doctor.Name.Contains(keyword)
-                        && s.DeleteFlag == false)
-                        .OrderByDescending(a => a.CreatedAt)
-                        .Skip((pageNumber - 1) * PageSize)
-                        .Take(PageSize)
-                        .ToList();
-
-            if (Comments == null || Comments.Count == 0)
+            catch (Exception ex)
             {
-                return NotFound("Không có ");
+                return BadRequest(ex.Message);
             }
+        }
 
-            var results = Comments.Select(_mapper.Map<Comment, CommentDTO>).ToList();
-
-            return Ok(results);
+        [HttpGet("list/{doctorId}")]
+        public IActionResult GetCommentsByDoctor(int pageNumber, int doctorId)
+        {
+            try
+            {
+                var results = commentService.GetCommentsByDoctor(pageNumber, doctorId);
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
         [HttpGet("{id}")]
         public IActionResult GetComment(int id)
         {
-            var ser = _context.Comments
-                .Where(x => x.Id == id)
-                .Include(a => a.Patient)
-                .Include(d => d.Doctor)
-                .FirstOrDefault();
-
-            if (ser == null)
+            try
             {
-                return NotFound("Không có");
+                var results = commentService.GetCommentById(id);
+                return Ok(results);
             }
-            var serDTO = _mapper.Map<CommentDTO>(ser);
-
-            return Ok(serDTO);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
         [HttpPost]
         public IActionResult AddComment(CommentDTO CommentDTO)
         {
-            var cmt = new Comment
-            {
-                CommentDetail = CommentDTO.CommentDetail,
-                PatientId = CommentDTO.PatientId,
-                DoctorId = CommentDTO.DoctorId,
-                RatingStar = CommentDTO.RatingStar,
-                CreatedAt = DateTime.Now,
-                DeleteFlag = false,
-            };
             try
             {
-                _context.Comments.Add(cmt);
-                _context.SaveChanges();
+                commentService.AddComment(CommentDTO);
                 return Ok("Thêm mới thành công");
             }
             catch (Exception ex)
@@ -153,38 +96,30 @@ namespace DentalClinicProject.Controllers
         [HttpPut("{id}")]
         public ActionResult UpdateComment(int id, CommentDTO CommentDTO)
         {
-            var Comment = _context.Comments.FirstOrDefault(o => o.Id == id);
-            if (Comment == null)
-            {
-                return NotFound();
-            }
             try
             {
-                Comment.CommentDetail = CommentDTO.CommentDetail;
-                Comment.PatientId = CommentDTO.PatientId;
-                Comment.DeleteFlag = CommentDTO.DeleteFlag;
-                Comment.DoctorId = CommentDTO.DoctorId;
-                Comment.RatingStar  = CommentDTO.RatingStar;
+                commentService.UpdateComment(id, CommentDTO);
             }
             catch (Exception ex)
             {
                 return BadRequest(" Cập nhật thất bại");
             }
 
-            _context.SaveChanges();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public ActionResult DeleteComment(int id)
         {
-            var Comment = _context.Comments.FirstOrDefault(o => o.Id == id);
-            if (Comment == null)
+            try
             {
-                return NotFound();
+                commentService.DeleteComment(id);
             }
-            Comment.DeleteFlag = true;
-            _context.SaveChanges();
+            catch (Exception ex)
+            {
+                return BadRequest(" Cập nhật thất bại");
+            }
+
             return NoContent();
         }
     }

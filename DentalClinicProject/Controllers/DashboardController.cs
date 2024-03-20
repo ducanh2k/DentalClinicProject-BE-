@@ -49,6 +49,7 @@ namespace DentalClinicProject.Controllers
                                       Month = g.Key.Month,
                                       TotalPayOfMonth = g.Sum(x => x.TotalPay)
                                   })
+                                  .OrderBy(x => x.Month)
                                   .ToList<object>();
                 return Ok(result);
             }
@@ -209,6 +210,7 @@ namespace DentalClinicProject.Controllers
                                                           Month = g.Key.Month,
                                                           TotalSpentOfMonth = g.Sum(x => x.TotalSpent)
                                                       })
+                                                      .OrderBy(x => x.Month)
                                                       .ToList<object>();
                     return Ok(result);
                 }else
@@ -221,6 +223,7 @@ namespace DentalClinicProject.Controllers
                                       Month = g.Key.Month,
                                       TotalPayOfMonth = g.Sum(x => x.TotalSpent)
                                   })
+                                  .OrderBy(x => x.Month)
                                   .ToList<object>();
                     return Ok(result);
                 }

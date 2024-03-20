@@ -1,5 +1,4 @@
-﻿global using DentalClinicProject.Services.UserService;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +9,7 @@ using System.Security.Cryptography;
 using DentalClinicProject.Models;
 using DentalClinicProject.DTO;
 using Microsoft.EntityFrameworkCore;
+using DentalClinicProject.Services.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -31,40 +31,6 @@ namespace DentalClinicProject.Controllers
             _context = context;
         }
 
-
-        [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(UserRegisterDTO request)
-        {
-
-
-            if (!request.IsValidRole())
-            {
-                return BadRequest(new { Error = "Vai trò không đúng đề nghị nhập lại" });
-            }
-            user = new User();
-
-            user.Email = request.Email;
-            //user.Phone = request.Phone;
-            //user.Name = request.Name;
-            //user.Description = request.Description;
-            user.Role = request.RoleId;
-            //user.Salary = request.Salary;
-            user.DateCreated = DateTime.Now;
-
-            user.CreatePasswordHash(request.password);
-            
-            try
-            {
-                _context.Users.Add(user);
-                _context.SaveChanges();
-                return Ok(user);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(user);
-            }
-            
-        }
 
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserLoginDTO request)

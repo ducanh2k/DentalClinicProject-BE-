@@ -1,6 +1,7 @@
-﻿  using DentalClinicProject.DTO;
+﻿using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
-using DentalClinicProject.Services.UserService;
+using DentalClinicProject.Services.Implement;
+using DentalClinicProject.Services.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +16,13 @@ namespace DentalClinicProject.Controllers
     [ApiController]
     public class ServiceController : ControllerBase
     {
-        private readonly dentalContext _context;
-        private readonly IConfiguration _configuration;
-        private readonly int PageSize;
+        
         private readonly IUserService _userService;
+        private readonly IServiceService serviceService;
 
-        public ServiceController(dentalContext context, IConfiguration configuration, IUserService userService)
+        public ServiceController(IServiceService _serviceService, IUserService userService)
         {
-            _context = context;
-            _configuration = configuration;
-            PageSize = Convert.ToInt32(_configuration.GetValue<string>("AppSettings:PageSize"));
+            serviceService = _serviceService;
             _userService = userService;
         }
         //get all
@@ -35,102 +33,53 @@ namespace DentalClinicProject.Controllers
         [HttpGet("list")]
         public IActionResult GetServices(int pageNumber)
         {
-            
-            var totalServices = _context.Services
-                              .Count(s => s.DeleteFlag == false);
-
-            var totalPages = (int)Math.Ceiling((double)totalServices / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            var services = _context.Services
-                        .Where(s => s.DeleteFlag == false) 
-                        .Skip((pageNumber - 1) * PageSize)
-                        .Take(PageSize)
-                        .ToList();
-
-            if (services == null || services.Count == 0)
+            try
             {
-                return NotFound("Không có dịch vụ");
+                var services = serviceService.GetServices(pageNumber);
+                return Ok(services);
+            }catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
-            return Ok(services);
         }
 
         //search name
         [HttpGet("search")]
         public IActionResult GetServicesByName(string keyword, int pageNumber)
         {
-            if (string.IsNullOrWhiteSpace(keyword))
+            try
             {
-                return BadRequest("Từ khóa tìm kiếm không được để trống");
+                var services = serviceService.GetServicesByName(keyword,pageNumber);
+                return Ok(services);
             }
-
-            var services = _context.Services
-                .Where(s => s.ServiceName.Contains(keyword)
-                || s.BriefInfo.Contains(keyword)
-                || s.Description.Contains(keyword)
-                && s.DeleteFlag == false)
-                .ToList();
-
-            if (services == null || services.Count == 0)
+            catch (Exception ex)
             {
-                return NotFound("Không có dịch vụ nào phù hợp");
+                return BadRequest(ex.Message);
             }
-
-            var totalServices = services.Count();
-
-            var totalPages = (int)Math.Ceiling((double)totalServices / PageSize);
-
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            services = services
-                .Skip((pageNumber - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-
-            return Ok(services);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetService(int id)
         {
-            var ser = _context.Services
-                .Where(x => x.ServiceId == id)
-                .Select(d => new 
-                {
-                    ServiceId = d.ServiceId,
-                    ServiceName = d.ServiceName,
-                    Price = d.Price,
-                    BriefInfo = d.BriefInfo,
-                    Description = d.Description,
-                    DeleteFlag = d.DeleteFlag
-                })
-                .FirstOrDefault();
-
-            if (ser == null)
+            try
             {
-                return NotFound("Không có");
+                var services = serviceService.GetService(id);
+                return Ok(services);
             }
-            return Ok(ser);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
         [HttpPost]
         public IActionResult AddService(ServiceDTO ser)
         {
-            var service = new Service
-            {
-                ServiceName = ser.ServiceName,
-                BriefInfo = ser.BriefInfo,
-                Description = ser.Description,
-                Price = ser.Price,
-                DeleteFlag = ser.DeleteFlag,
-            };
             try
             {
-                _context.Services.Add(service);
-                _context.SaveChanges();
-                return Ok("Thêm mới thành công");
+                serviceService.AddService(ser);
+                return Ok("Thêm mới dịch vụ thành công");
             }
             catch (Exception ex)
             {
@@ -141,31 +90,29 @@ namespace DentalClinicProject.Controllers
         [HttpPut("{id}")]
         public ActionResult UpdateService(int id, ServiceDTO serDTO)
         {
-            var service = _context.Services.FirstOrDefault(o => o.ServiceId == id);
-            if (service == null)
+            try
             {
-                return NotFound();
+                serviceService.UpdateService(id, serDTO);
+                return Ok("Cập nhật dịch vụ thành công");
             }
-            service.ServiceName = serDTO.ServiceName;
-            service.BriefInfo = serDTO.BriefInfo;
-            service.Description = serDTO.Description;
-            service.Price = serDTO.Price;
-            service.DeleteFlag = serDTO.DeleteFlag;
-            _context.SaveChanges();
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest("Cập nhật dịch vụ thất bại");
+            }
         }
 
         [HttpDelete("{id}")]
         public ActionResult DeleteService(int id)
         {
-            var service = _context.Services.FirstOrDefault(o => o.ServiceId == id);
-            if (service == null)
+            try
             {
-                return NotFound();
+                serviceService.DeleteService(id);
+                return Ok("Xóa dịch vụ thành công");
             }
-            service.DeleteFlag = true;
-            _context.SaveChanges();
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest("Xóa dịch vụ thất bại");
+            }
         }
     }
 }
