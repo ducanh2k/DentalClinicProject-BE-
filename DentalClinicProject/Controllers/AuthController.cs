@@ -23,12 +23,14 @@ namespace DentalClinicProject.Controllers
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
         private readonly dentalContext _context;
+        private readonly IMailService _mailService;
 
-        public AuthController(dentalContext context, IConfiguration configuration, IUserService userService)
+        public AuthController(dentalContext context, IConfiguration configuration, IUserService userService, IMailService _MailService)
         {
             _configuration = configuration;
             _userService = userService;
             _context = context;
+            _mailService = _MailService;
         }
 
 
@@ -59,6 +61,20 @@ namespace DentalClinicProject.Controllers
               Role = user.RoleNavigation.Name
             });
         }
+
+        [HttpPost("restPassword")]
+        public async Task<ActionResult<string>> restPassword(UserLoginDTO request)
+        {
+
+
+            var checkMail = _mailService.SendMail(request);
+            if (checkMail != true) {
+                return BadRequest("Email không tồn tại trong hệ thống");
+            }
+
+            return Ok("Mật khẩu đã được đổi thành công và gửi qua email.");
+        }
+
 
         [HttpPost("refresh-token")]
         public async Task<ActionResult<string>> RefreshToken()

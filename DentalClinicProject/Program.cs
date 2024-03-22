@@ -38,6 +38,9 @@ builder.Services.AddScoped<IMedicalRecordDetailService, MedicalRecordDetailServi
 builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
 builder.Services.AddScoped<IPrescriptionDetailService, PrescriptionDetailService>();
 
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.AddTransient<IMailService, MailService>();
+
 builder.Services.AddHttpContextAccessor();
 //Config automapper
 builder.Services.AddAutoMapper(typeof(MyMapperProfile));
