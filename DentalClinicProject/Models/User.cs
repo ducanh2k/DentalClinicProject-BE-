@@ -38,6 +38,9 @@ namespace DentalClinicProject.Models
         public string? RefreshToken { get; set; }
         public DateTime? TokenCreated { get; set; }
         public DateTime? TokenExpires { get; set; }
+        public bool? Gender { get; set; }
+        public string? Address { get; set; }
+        public DateTime? Dob { get; set; }
 
         public virtual Role? RoleNavigation { get; set; }
         public virtual ICollection<Appointment> AppointmentDoctors { get; set; }

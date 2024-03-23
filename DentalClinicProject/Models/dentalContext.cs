@@ -41,7 +41,7 @@ namespace DentalClinicProject.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("server =(local); database = dental;uid=sa;pwd=123;TrustServerCertificate=true");
+                optionsBuilder.UseSqlServer("server =(local); database = dental ;uid=sa;pwd=123;TrustServerCertificate=true");
             }
         }
 
@@ -481,6 +481,8 @@ namespace DentalClinicProject.Models
 
                 entity.Property(e => e.UserId).HasColumnName("user_id");
 
+                entity.Property(e => e.Address).HasColumnName("address");
+
                 entity.Property(e => e.DateCreated)
                     .HasColumnType("date")
                     .HasColumnName("date_created");
@@ -491,7 +493,13 @@ namespace DentalClinicProject.Models
                     .HasColumnType("text")
                     .HasColumnName("description");
 
+                entity.Property(e => e.Dob)
+                    .HasColumnType("datetime")
+                    .HasColumnName("dob");
+
                 entity.Property(e => e.Email).HasColumnName("email");
+
+                entity.Property(e => e.Gender).HasColumnName("gender");
 
                 entity.Property(e => e.Img).HasColumnName("img");
 
