@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using AutoMapper.Internal;
 using DentalClinicProject.DTO;
 using DentalClinicProject.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DentalClinicProject.Controllers
@@ -237,19 +239,40 @@ namespace DentalClinicProject.Controllers
 
         //top 8 service duoc dung nhieu nhat all time
         [HttpGet("topService")]
-        public ActionResult GetTopSers()
+        public ActionResult GetTopServices()
         {
             try
             {
-                var result = (from il in _context.InvoiceLines
-                              join i in _context.Invoices on il.InvoiceId equals i.InvoiceId
-                              group il by il.ServiceId into g
-                              orderby g.Count() descending
-                              select new
-                              {
-                                  ServiceId = g.Key,
-                                  UsageCount = g.Count()
-                              }).Take(8);
+                var totalRevenue = (from il in _context.InvoiceLines
+                                    join i in _context.Invoices on il.InvoiceId equals i.InvoiceId
+                                    join s in _context.Services on il.ServiceId equals s.ServiceId
+                                    select il.Service.Price * il.Quantity).Sum();
+
+                var topServices = (from il in _context.InvoiceLines
+                                   join i in _context.Invoices on il.InvoiceId equals i.InvoiceId
+                                   join s in _context.Services on il.ServiceId equals s.ServiceId
+                                   group il by il.ServiceId into g
+                                   orderby g.Sum(x => x.Service.Price * x.Quantity) descending
+                                   select new
+                                   {
+                                       ServiceId = g.Key,
+                                       TotalRevenue = g.Sum(x => x.Service.Price * x.Quantity)
+                                   }).Take(10).ToList();
+
+                var otherServicesRevenue = totalRevenue - topServices.Sum(s => s.TotalRevenue);
+                var topServicesPercentage = topServices.Select(s => new
+                {
+                    ServiceId = s.ServiceId,
+                    ServiceName = _context.Services.FirstOrDefault(service => service.ServiceId == s.ServiceId)?.ServiceName,
+                    Percentage = (double)Math.Round(((double)s.TotalRevenue / (double)totalRevenue) * 100, 2)
+                }).ToList();
+
+                var otherServicesPercentage = Math.Round(((double)otherServicesRevenue / (double)totalRevenue) * 100, 2);
+                var result = new
+                {
+                    TopServicesPercentage = topServicesPercentage,
+                    OtherServicesPercentage = otherServicesPercentage
+                };
 
                 return Ok(result);
             }
@@ -258,6 +281,8 @@ namespace DentalClinicProject.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+
 
         // top 8 vat lieu duoc dung nhieu nhat all time
         [HttpGet("topMaterial")]
@@ -265,19 +290,48 @@ namespace DentalClinicProject.Controllers
         {
             try
             {
-                var result = (from il in _context.InvoiceLines
-                              join m in _context.Materials on il.MaterialId equals m.MaterialId
-                              group new { il, m } by new { il.MaterialId, m.MaterialName } into g
-                              select new 
-                              {
-                                  MaterialId = g.Key.MaterialId,
-                                  MaterialName = g.Key.MaterialName,
-                                  TotalQuantity = g.Sum(x => x.il.Quantity),
-                                  TotalPay = g.Sum(x => x.m.UnitPrice * x.il.Quantity)
-                              })
-                         .OrderByDescending(x => x.TotalQuantity)
-                         .Take(8)
-                         .ToList();
+                // Tính tổng doanh thu của tất cả các vật liệu
+                var totalRevenue = (from il in _context.InvoiceLines
+                                    join m in _context.Materials on il.MaterialId equals m.MaterialId
+                                    select m.UnitPrice * il.Quantity).Sum();
+
+                // Lấy top 5 vật liệu theo tổng số lượng
+                var topMaterials = (from il in _context.InvoiceLines
+                                    join m in _context.Materials on il.MaterialId equals m.MaterialId
+                                    group new { il, m } by new { il.MaterialId, m.MaterialName } into g
+                                    select new
+                                    {
+                                        MaterialId = g.Key.MaterialId,
+                                        MaterialName = g.Key.MaterialName,
+                                        TotalQuantity = g.Sum(x => x.il.Quantity),
+                                        TotalPay = g.Sum(x => x.m.UnitPrice * x.il.Quantity)
+                                    })
+                                .OrderByDescending(x => x.TotalQuantity)
+                                .Take(10)
+                                .ToList();
+
+                // Tính tổng doanh thu của top 5 vật liệu
+                var totalTopRevenue = topMaterials.Sum(x => x.TotalPay);
+
+                // Tính phần trăm của mỗi vật liệu so với tổng doanh thu
+                var topMaterialsPercentage = topMaterials.Select(m => new
+                {
+                    MaterialId = m.MaterialId,
+                    MaterialName = m.MaterialName,
+                    Percentage = (double)Math.Round(((double)m.TotalPay / (double)totalRevenue) * 100, 2)
+                }).ToList();
+
+                // Tính phần trăm của các vật liệu còn lại
+                var otherMaterialsRevenue = totalRevenue - totalTopRevenue;
+                var otherMaterialsPercentage = Math.Round(((double)otherMaterialsRevenue / (double)totalRevenue) * 100, 2);
+
+                // Trả về kết quả
+                var result = new
+                {
+                    TopMaterials = topMaterialsPercentage,
+                    OtherMaterialsPercentage = otherMaterialsPercentage
+                };
+
                 return Ok(result);
             }
             catch (Exception ex)
@@ -285,6 +339,7 @@ namespace DentalClinicProject.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
 
 
 

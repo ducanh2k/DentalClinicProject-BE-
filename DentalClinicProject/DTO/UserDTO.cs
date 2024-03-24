@@ -15,6 +15,10 @@ namespace DentalClinicProject.DTO
         public string? RoleName { get; set; }
         public bool? DeleteFlag { get; set; }
 
+        public string? Gender { get; set; }
+        public string? Address { get; set; }
+        public DateTime? Dob { get; set; }
+
         public bool IsValidRole()
         {
             // Define your valid roles
@@ -33,6 +37,9 @@ namespace DentalClinicProject.DTO
         public string? Phone { get; set; }
         public string? Img { get; set; }
         public string? Description { get; set; }
+        public bool? Gender { get; set; }
+        public string? Address { get; set; }
+        public DateTime? Dob { get; set; }
 
         public bool IsValidRole()
         {
