@@ -188,7 +188,7 @@ namespace DentalClinicProject.Services.Implement
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception(" Cập nhật thất bại");
+                    throw new Exception(" Cập nhật tin tức thất bại");
                 }
 
                 _context.SaveChanges();

@@ -44,7 +44,7 @@ namespace DentalClinicProject.Services.Implement
                 var MedicalRecord = _context.MedicalRecords.FirstOrDefault(o => o.MedicalRecordId == id);
                 if (MedicalRecord == null)
                 {
-                    throw new Exception("Hồ sơ không tồn tại");
+                    throw new Exception("Hồ sơ khám bệnh không tồn tại");
                 }
                 MedicalRecord.DeleteFlag = true;
                 _context.SaveChanges();
@@ -96,7 +96,7 @@ namespace DentalClinicProject.Services.Implement
                 // Kiểm tra xem có bất kỳ hồ sơ y tế nào được tìm thấy không
                 if (medicalRecords == null || medicalRecords.Count == 0)
                 {
-                    throw new Exception("Không có hồ sơ y tế nào cho bệnh nhân này");
+                    throw new Exception("Bệnh nhận này không có hồ sơ khám bệnh");
                 }
 
                 //var medicalRecordDTOs = _mapper.Map<List<MedicalRecordDTO>>(medicalRecords);
@@ -128,7 +128,7 @@ namespace DentalClinicProject.Services.Implement
                     .ToList();
                 if (list == null || list.Count == 0)
                 {
-                    throw new Exception("Không có lịch sử khám");
+                    throw new Exception("Không có hồ sơ khám bệnh");
                 }
 
                 //map
@@ -189,7 +189,7 @@ namespace DentalClinicProject.Services.Implement
                 // Kiểm tra xem có bất kỳ hồ sơ y tế nào được tìm thấy không
                 if (medicalRecords == null || medicalRecords.Count == 0)
                 {
-                    throw new Exception("Không có hồ sơ y tế nào cho bệnh nhân này");
+                    throw new Exception("Bệnh nhận này không có hồ sơ khám bệnh");
                 }
 
                 return medicalRecords;
@@ -208,7 +208,7 @@ namespace DentalClinicProject.Services.Implement
                 var MedicalRecord = _context.MedicalRecords.FirstOrDefault(o => o.MedicalRecordId == id);
                 if (MedicalRecord == null)
                 {
-                    throw new Exception("Hồ sơ không tồn tại");
+                    throw new Exception("Hồ sơ khám bệnh không tồn tại");
                 }
                 MedicalRecord.PatientId = MedicalRecordDTO.PatientId;
                 MedicalRecord.DeleteFlag = MedicalRecordDTO.DeleteFlag;

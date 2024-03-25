@@ -84,7 +84,7 @@ namespace DentalClinicProject.Services.Implement
                     .ToList();
                 if (Materials == null || Materials.Count == 0)
                 {
-                    throw new Exception("Không có dịch vụ");
+                    throw new Exception("Không có vật liệu nào");
                 }
                 return Materials;
             }
@@ -121,7 +121,7 @@ namespace DentalClinicProject.Services.Implement
 
                 if (Materials == null || Materials.Count == 0)
                 {
-                    throw new Exception("Không có dịch vụ nào phù hợp");
+                    throw new Exception("Không có vật liệu nào");
                 }
 
                 return Materials;

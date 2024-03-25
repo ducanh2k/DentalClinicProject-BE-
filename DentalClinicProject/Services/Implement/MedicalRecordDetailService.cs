@@ -46,7 +46,7 @@ namespace DentalClinicProject.Services.Implement
                 var MedicalRecordDetail = _context.MedicalRecordDetails.FirstOrDefault(o => o.MrDetailId == id);
                 if (MedicalRecordDetail == null)
                 {
-                    throw new Exception("Đơn thuốc không tồn tại");
+                    throw new Exception("Lịch sử khám không tồn tại");
                 }
                 MedicalRecordDetail.DeleteFlag = true;
                 _context.SaveChanges();
@@ -66,7 +66,7 @@ namespace DentalClinicProject.Services.Implement
                 .FirstOrDefault(x => x.MrDetailId == id);
                 if (MedicalRecordDetails == null)
                 {
-                    throw new Exception("Không có đơn thuốc");
+                    throw new Exception("Không có lịch sử khám");
                 }
 
                 //map
@@ -119,7 +119,7 @@ namespace DentalClinicProject.Services.Implement
                 var MedicalRecordDetail = _context.MedicalRecordDetails.Include(m => m.MedicalRecord).FirstOrDefault(o => o.MrDetailId == id);
                 if (MedicalRecordDetail == null)
                 {
-                    throw new Exception("Đơn thuốc này không tồn tại");
+                    throw new Exception("Lịch sử khám này không tồn tại");
                 }
                 MedicalRecordDetail.MedicalRecordId = MedicalRecordDetailDTO.MedicalRecordId;
                 MedicalRecordDetail.ServiceId = MedicalRecordDetailDTO.ServiceId;
@@ -159,7 +159,7 @@ namespace DentalClinicProject.Services.Implement
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Thêm mới hóa đơn thất bại");
+                    throw new Exception("Thêm mới lịch sử khám thất bại");
                 }
             }
             catch (Exception ex)

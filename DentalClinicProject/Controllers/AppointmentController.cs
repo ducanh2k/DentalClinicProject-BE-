@@ -54,6 +54,20 @@ namespace DentalClinicProject.Controllers
             }
         }
 
+        [HttpGet("list/doctorId")]
+        public IActionResult GetAppointmentsByDoctor(int pageNumber, int doctorId)
+        {
+            try
+            {
+                var appointments = appointmentService.GetAppointmentsByDoctorId(pageNumber, doctorId);
+                return Ok(appointments);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetAppointment(int id)
         {
