@@ -247,7 +247,7 @@ namespace DentalClinicProject.Services.Implement
                 var degree = _context.Degrees.FirstOrDefault(d => d.Id == id);
                 if (degree == null)
                 {
-                    throw new Exception("Không tìm thấy degree");
+                    throw new Exception("Không tìm thấy chứng chỉ");
                 }
 
                 _context.Degrees.Remove(degree);
@@ -330,7 +330,7 @@ namespace DentalClinicProject.Services.Implement
 
                 if (AreasOfExpertises == null)
                 {
-                    throw new Exception("Không có gi");
+                    throw new Exception("Không có kỹ năng chuyên môn");
                 }
                 return AreasOfExpertises;
             }
@@ -355,7 +355,7 @@ namespace DentalClinicProject.Services.Implement
 
                 if (AreasOfExpertises == null || AreasOfExpertises.Count == 0)
                 {
-                    throw new Exception("Không có gi");
+                    throw new Exception("Kỹ năng chuyên môn này không tồn tại");
                 }
                 return AreasOfExpertises;
             }
@@ -371,7 +371,15 @@ namespace DentalClinicProject.Services.Implement
             {
                 var degrees = _context.Degrees
                     .FirstOrDefault(x => x.Id == Id);
-
+                var user = _context.Users.FirstOrDefault(x => x.UserId == degrees.EmployeeId);
+                if (user.Role != 3)
+                {
+                    throw new Exception("Người dùng không phải là bác sĩ");
+                }
+                if (degrees == null )
+                {
+                    throw new Exception("Chứng chỉ này không tồn tại");
+                }
                 return degrees;
             }
             catch (Exception ex)
@@ -396,7 +404,7 @@ namespace DentalClinicProject.Services.Implement
 
                 if (degrees == null || degrees.Count == 0)
                 {
-                    throw new Exception("Không có gi");
+                    throw new Exception("Không có chứng chỉ ");
                 }
                 return degrees;
             }
@@ -419,7 +427,7 @@ namespace DentalClinicProject.Services.Implement
                 }
                 if (ForeignLanguages == null)
                 {
-                    throw new Exception("Không có gi");
+                    throw new Exception("Không có ngoại ngữ này");
                 }
                 return ForeignLanguages;
             }
@@ -444,7 +452,7 @@ namespace DentalClinicProject.Services.Implement
 
                 if (ForeignLanguages == null || ForeignLanguages.Count == 0)
                 {
-                    throw new Exception("Không có gi");
+                    throw new Exception("Không có ngoại ngữ");
                 }
                 return ForeignLanguages;
             }
@@ -467,7 +475,7 @@ namespace DentalClinicProject.Services.Implement
                 }
                 if (ParticipatingTrainingCourses == null)
                 {
-                    throw new Exception("Không có gi");
+                    throw new Exception("Không có khóa đào tạo này");
                 }
                 return ParticipatingTrainingCourses;
             }
@@ -493,7 +501,7 @@ namespace DentalClinicProject.Services.Implement
 
                 if (ParticipatingTrainingCourses == null || ParticipatingTrainingCourses.Count == 0)
                 {
-                    throw new Exception("Không có gi");
+                    throw new Exception("Không có khóa đào tạo");
                 }
                 return ParticipatingTrainingCourses;
             }
@@ -536,7 +544,7 @@ namespace DentalClinicProject.Services.Implement
                    .FirstOrDefault();
                 if (user == null)
                 {
-                    throw new Exception("Không có gi");
+                    throw new Exception("Không có người dùng này");
                 }
                 return user;
             }
@@ -566,7 +574,7 @@ namespace DentalClinicProject.Services.Implement
                     .ToList();
                 if (users == null || users.Count == 0)
                 {
-                    throw new Exception("Không có dịch vụ");
+                    throw new Exception("Không có người dùng");
                 }
                 //map
                 List<UserDTO> results = new List<UserDTO>();
@@ -600,7 +608,7 @@ namespace DentalClinicProject.Services.Implement
 
                 if (users == null || users.Count == 0)
                 {
-                    throw new Exception("Không có dịch vụ nào phù hợp");
+                    throw new Exception("Không có người dùng nào phù hợp");
                 }
 
                 //map
@@ -648,7 +656,7 @@ namespace DentalClinicProject.Services.Implement
 
                 if (degree == null)
                 {
-                    throw new Exception("Không tìm thấy degree");
+                    throw new Exception("Không tìm thấy chứng chỉ");
                 }
 
                 // Cập nhật thông tin degree

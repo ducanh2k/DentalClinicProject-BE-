@@ -7,6 +7,7 @@ namespace DentalClinicProject.Services.Interface
     {
         List<AppointmentDTO> GetAppointments(int pageNumber);
         List<AppointmentDTO> GetAppointmentsByUserId(int pageNumber,int userId);
+        List<AppointmentDTO> GetAppointmentsByDoctorId(int pageNumber, int doctorId);
         AppointmentDTO GetAppointmentById(int id);
         List<AppointmentDTO> GetAppointmentsBySearch(int pageNumber,string keyword);
         void AddAppointment(AddAppointmentDTO appointmentDTO);
